@@ -1,3 +1,5 @@
+package com.chessBOTP;
+
 import javax.swing.*;
 
 /**
