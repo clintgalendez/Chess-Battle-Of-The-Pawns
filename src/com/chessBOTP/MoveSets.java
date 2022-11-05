@@ -1,3 +1,5 @@
+package com.chessBOTP;
+
 public class MoveSets {
     private static final int[][] KNIGHT = {
         {-2, -1}, {-2, 1}, {-1, -2}, {-1, 2},
