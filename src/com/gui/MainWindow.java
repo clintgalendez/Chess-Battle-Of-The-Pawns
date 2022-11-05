@@ -1,12 +1,14 @@
+package com.gui;
+
+import com.chessBOTP.Cells;
 import java.awt.*;
 import javax.swing.*;
 
-public class GUI extends JFrame {
-    JLabel num[] = new JLabel[8];
-    JLabel letters[] = new JLabel[8];
-    JButton t [][] = new JButton [8][8];
-    
-    static Cells[][] cells = new Cells[8][8];
+public class MainWindow extends JFrame {
+    private JLabel num[] = new JLabel[8];
+    private JLabel letters[] = new JLabel[8];
+    private static Cells[][] cells = new Cells[8][8];
+    private JPanel grid = new JPanel();
 
     /**
      * Sets the color of the cells that is available to move to. references the
@@ -24,8 +26,11 @@ public class GUI extends JFrame {
         }
     }
 
+    public static Cells[][] getCells() {
+        return cells;
+    }
 
-    public GUI (){
+    public MainWindow (){
       setDefaultCloseOperation(EXIT_ON_CLOSE);
 		  setTitle("Chess");
 		  setLayout(new BorderLayout());
@@ -49,12 +54,11 @@ public class GUI extends JFrame {
       }
 
       //JPanel for cells
-      JPanel grid = new JPanel();
       grid.setLayout(new GridLayout (8, 8));
       for (int x = 0; x<8; x++){
         for (int y = 0; y<8; y++){
-          t[x][y] = new JButton ();
-          grid.add (t[x][y]);
+          cells[x][y] = new Cells (x, y, 0);
+          grid.add (cells[x][y]);
         }
       }
 
