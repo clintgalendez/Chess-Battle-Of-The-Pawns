@@ -14,7 +14,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -44,7 +43,6 @@ public class Chessboard implements ActionListener {
 
     private JLabel gamebg, player1Icon, player2Icon,
                    playerName1, playerName2,
-                    homeButton, settingsButton, 
                    pCapturedP1, pCapturedP2;
 
     private Cells cells[][] = new Cells[8][8];
@@ -56,6 +54,8 @@ public class Chessboard implements ActionListener {
     private Time clock;
 
     private UndoButton undobutton;
+    private HomeButton homebutton;
+    private SettingsButton settingsbutton;
 
     private static final Color LUMBER = new Color(255, 229, 204);
     private static final Color PEACH_ORANGE = new Color(252, 187, 122);
@@ -234,23 +234,19 @@ public class Chessboard implements ActionListener {
         undoPanel.setBounds(18,600,60,60);
         undoPanel.add(undobutton);
 
-        homeButton = new JLabel("Home");
-        homeButton.setFont(new Font("Verdana",Font.PLAIN,10));
-        homeButton.setForeground(Color.BLACK);
-        homeButton.setHorizontalAlignment(JTextField.CENTER);
+        homebutton = new HomeButton();
+        homebutton.setBounds(10,10,40,40);
 
-        homePanel = new GradientPanel(new BorderLayout(), 10);
+        homePanel = new GradientPanel(null, 10);
         homePanel.setBounds(1184,600,60,60);
-        homePanel.add(homeButton, BorderLayout.CENTER);
+        homePanel.add(homebutton);
 
-        settingsButton = new JLabel("Settings");
-        settingsButton.setFont(new Font("Verdana",Font.PLAIN,10));
-        settingsButton.setForeground(Color.BLACK);
-        settingsButton.setHorizontalAlignment(JTextField.CENTER);
+        settingsbutton = new SettingsButton(clock);
+        settingsbutton.setBounds(10,10,40,10);
 
-        settingsPanel = new GradientPanel(new BorderLayout(), 10);
+        settingsPanel = new GradientPanel(null, 10);
         settingsPanel.setBounds(1184,560,60,30);
-        settingsPanel.add(settingsButton, BorderLayout.CENTER);
+        settingsPanel.add(settingsbutton);
 
         mainPanel.add(boardPanel);
         mainPanel.add(pieceCapturedP1);
@@ -266,6 +262,8 @@ public class Chessboard implements ActionListener {
 
         layeredPane.add(gamebg, Integer.valueOf(0));
         layeredPane.add(mainPanel, Integer.valueOf(1));
+
+        clock.timer.start();
     }
 
     @Override
