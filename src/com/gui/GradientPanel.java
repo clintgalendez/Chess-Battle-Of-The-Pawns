@@ -26,8 +26,8 @@ public class GradientPanel extends JPanel {
         protected void paintComponent(Graphics g) {
             super.paintComponent(g);
             Dimension arcs = new Dimension(cornerRadius, cornerRadius);
-            int width = 625;
-            int height = 615;
+            int width = getBounds().width;
+            int height = getBounds().height;
             
             Graphics2D g2d = (Graphics2D) g;
 
