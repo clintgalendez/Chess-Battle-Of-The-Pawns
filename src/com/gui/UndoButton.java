@@ -4,54 +4,68 @@ import com.chessBOTP.Cells;
 
 import java.awt.event.MouseListener;
 
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import javax.swing.JTextField;
 
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.awt.event.MouseEvent;
+
+import java.io.InputStream;
+
+import javax.imageio.ImageIO;
 
 import java.util.Stack;
 
 public class UndoButton extends JLabel implements MouseListener {
 
+    private Image background;
     Stack<Cells> undo = new Stack<Cells>();
-    
+
     UndoButton() {
-        setText("Undo");
-        setFont(new Font("Verdana",Font.PLAIN,10));
-        setForeground(Color.BLACK);
-        setHorizontalAlignment(JTextField.CENTER);
+        createBackground();
+
+        setIcon(new ImageIcon(background));
+
         addMouseListener(this);
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
         
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+        setBorder(BorderFactory.createLoweredSoftBevelBorder());
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        // TODO Auto-generated method stub
+        setBorder(BorderFactory.createRaisedSoftBevelBorder());
         
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+        setBorder(BorderFactory.createRaisedSoftBevelBorder());
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        // TODO Auto-generated method stub
+        setBorder(null);
         
+    }
+
+    private final void createBackground() {
+        try {
+            InputStream in = Chessboard.class.getResourceAsStream("sample.png");
+            BufferedImage bi = ImageIO.read(in);
+            background = bi;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
     }
 }

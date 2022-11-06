@@ -2,7 +2,6 @@ package com.gui;
 
 import com.chessBOTP.Cells;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -10,7 +9,6 @@ import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -21,9 +19,6 @@ import java.awt.Color;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.Font;
-import java.awt.GradientPaint;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Insets;
 
@@ -49,7 +44,7 @@ public class Chessboard implements ActionListener {
 
     private JLabel gamebg, player1Icon, player2Icon,
                    playerName1, playerName2,
-                   undoButton, homeButton, settingsButton, 
+                    homeButton, settingsButton, 
                    pCapturedP1, pCapturedP2;
 
     private Cells cells[][] = new Cells[8][8];
@@ -59,6 +54,8 @@ public class Chessboard implements ActionListener {
     private Image background;
     
     private Time clock;
+
+    private UndoButton undobutton;
 
     private static final Color LUMBER = new Color(255, 229, 204);
     private static final Color PEACH_ORANGE = new Color(252, 187, 122);
@@ -230,9 +227,12 @@ public class Chessboard implements ActionListener {
         clock = new Time();
         clock.setBounds(595,10,90,30);
 
-        undoPanel = new GradientPanel(new BorderLayout(), 10);
-        undoPanel.setBounds(18,600,60,60);
+        undobutton = new UndoButton();
+        undobutton.setBounds(10,10,40,40);
 
+        undoPanel = new GradientPanel(null, 10);
+        undoPanel.setBounds(18,600,60,60);
+        undoPanel.add(undobutton);
 
         homeButton = new JLabel("Home");
         homeButton.setFont(new Font("Verdana",Font.PLAIN,10));
@@ -329,55 +329,5 @@ public class Chessboard implements ActionListener {
 
     public Cells[][] getCells() {
         return cells;
-    }
-}
-
-class Time extends JPanel {
-    JLabel timeLabel = new JLabel();
-    int elapsedTime = 0;
-    int seconds =0;
-    int minutes =0;
-    int hours =0;
-    boolean started = false;
-    String seconds_string = String.format("%02d", seconds);
-    String minutes_string = String.format("%02d", minutes);
-    String hours_string = String.format("%02d", hours);
-    Timer timer = new Timer(1000, new ActionListener() {
-        public void actionPerformed(ActionEvent e) {
-            elapsedTime=elapsedTime+1000;
-            hours = (elapsedTime/3600000);
-            minutes = (elapsedTime/60000) % 60;
-            seconds = (elapsedTime/1000) % 60;
-            seconds_string = String.format("%02d", seconds);
-            minutes_string = String.format("%02d", minutes);
-            hours_string = String.format("%02d", hours);
-            timeLabel.setText(hours_string+":"+minutes_string+":"+seconds_string); 
-        }
-    });
-
-    private static final Color LUMBER = new Color(255, 229, 204);
-    private static final Color PEACH_ORANGE = new Color(252, 187, 122);
-
-    protected void paintComponent(Graphics g) {
-        Graphics2D g2d = (Graphics2D) g;
-        int width = 90;
-        int height = 30;
-
-        GradientPaint gp = new GradientPaint(0,0,LUMBER,180,height,PEACH_ORANGE);
-        g2d.setPaint(gp);
-        g2d.fillRect(0,0,width,height);
-    }
-
-    Time() {
-        setLayout(new BorderLayout());
-
-        timeLabel.setText(hours_string+":"+minutes_string+":"+seconds_string);
-        timeLabel.setBounds(0,0,30,10);
-        timeLabel.setFont(new Font("Verdana",Font.PLAIN,15));
-        timeLabel.setForeground(Color.BLACK);
-        timeLabel.setBorder(BorderFactory.createBevelBorder(1));
-        timeLabel.setHorizontalAlignment(JTextField.CENTER);
-
-        add(timeLabel, BorderLayout.CENTER);
     }
 }
