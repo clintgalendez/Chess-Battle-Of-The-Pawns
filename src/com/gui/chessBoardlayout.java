@@ -1,10 +1,12 @@
 package com.gui;
 
 import com.chessBOTP.Cells;
+import com.chessBOTP.Home;
+import com.chessBOTP.Settings;
+import com.chessBOTP.Undo;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
@@ -34,7 +36,7 @@ import java.io.InputStream;
 import javax.imageio.ImageIO;
 
 
-public class chessBoardLayout implements ActionListener {
+public class Chessboard implements ActionListener {
 
     //Class Variables
     private static final String COLUMN = "ABCDEFGH";
@@ -48,7 +50,7 @@ public class chessBoardLayout implements ActionListener {
 
     private JLayeredPane layeredPane;
 
-    private JLabel gamebg, pCapturedP1, pCapturedP2;
+    private JLabel gamebg, undoButton, homeButton, settingsButton, pCapturedP1, pCapturedP2;
 
     private Cells chessBoardSquares[][] = new Cells[8][8];
     private Cells pieceCapturedBoard1[][] = new Cells[8][8];
@@ -59,11 +61,14 @@ public class chessBoardLayout implements ActionListener {
     
     private Time clock;
 
-    private Color backgroundColor;
+    private Home home;
+    private Settings settings;
+    private Undo undo;
+
     private static final Color LUMBER = new Color(255, 229, 204);
     private static final Color PEACH_ORANGE = new Color(252, 187, 122);
 
-    public chessBoardLayout() {
+    public Chessboard() {
         initialize();
     }
 
@@ -198,14 +203,35 @@ public class chessBoardLayout implements ActionListener {
         clock = new Time();
         clock.setBounds(595,10,90,30);
 
-        undoPanel = new GradientPanel(null, 10);
+        undoButton = new JLabel("Undo");
+        undoButton.setFont(new Font("Verdana",Font.PLAIN,10));
+        undoButton.setForeground(Color.BLACK);
+        undoButton.setHorizontalAlignment(JTextField.CENTER);
+        undoButton.addMouseListener(undo);
+
+        undoPanel = new GradientPanel(new BorderLayout(), 10);
         undoPanel.setBounds(18,600,60,60);
+        undoPanel.add(undoButton, BorderLayout.CENTER);
 
-        homePanel = new GradientPanel(null, 10);
+        homeButton = new JLabel("Home");
+        homeButton.setFont(new Font("Verdana",Font.PLAIN,10));
+        homeButton.setForeground(Color.BLACK);
+        homeButton.setHorizontalAlignment(JTextField.CENTER);
+        homeButton.addMouseListener(home);
+
+        homePanel = new GradientPanel(new BorderLayout(), 10);
         homePanel.setBounds(1184,600,60,60);
+        homePanel.add(homeButton, BorderLayout.CENTER);
 
-        settingsPanel = new GradientPanel(null, 10);
+        settingsButton = new JLabel("Settings");
+        settingsButton.setFont(new Font("Verdana",Font.PLAIN,10));
+        settingsButton.setForeground(Color.BLACK);
+        settingsButton.setHorizontalAlignment(JTextField.CENTER);
+        settingsButton.addMouseListener(settings);
+
+        settingsPanel = new GradientPanel(new BorderLayout(), 10);
         settingsPanel.setBounds(1184,560,60,30);
+        settingsPanel.add(settingsButton, BorderLayout.CENTER);
 
         mainPanel.add(boardPanel);
         mainPanel.add(pieceCapturedP1);
@@ -234,7 +260,7 @@ public class chessBoardLayout implements ActionListener {
 
     private final void createBackground() {
         try {
-            InputStream in = chessBoardLayout.class.getResourceAsStream("sample.png");
+            InputStream in = Chessboard.class.getResourceAsStream("sample.png");
             BufferedImage bi = ImageIO.read(in);
             background = bi;
         } catch (Exception e) {
