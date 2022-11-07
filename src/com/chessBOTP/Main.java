@@ -12,7 +12,7 @@ public class Main {
     static boolean gameStarted = false;
     static TurnBasedHandler turnHandler;
     static boolean allowedToMove = false;
-    static Cells tempCell;
+    static Cells prevChosenCell;
 
     public static void main(String[] args) {
         //Create another thread for MainWindow
@@ -42,9 +42,9 @@ public class Main {
             return;
         }
 
-        if (tempCell == chosenCell) {
+        if (prevChosenCell == chosenCell) {
             resetColAvailCells();
-            tempCell = null;
+            prevChosenCell = null;
             allowedToMove = false;
             return;
         }
@@ -66,15 +66,15 @@ public class Main {
             }
 
             //**Move the Piece**//
-            chosenCell.CONTAINS = tempCell.CONTAINS; //The previous cell will now move to the new cell
-            chosenCell.pieceColor = tempCell.pieceColor; //The newly clicked cell will contain the color of the previous cell
-            chosenCell.setText(tempCell.getText()); //The newly clicked cell will contain the text of the previous cell
+            chosenCell.CONTAINS = prevChosenCell.CONTAINS; //The previous cell will now move to the new cell
+            chosenCell.pieceColor = prevChosenCell.pieceColor; //The newly clicked cell will contain the color of the previous cell
+            chosenCell.setText(prevChosenCell.getText()); //The newly clicked cell will contain the text of the previous cell
             turnHandler.getCurrentPlayer().addMove(chosenCell); //Add the move to the current player's moves
 
             //**Reset The previous Cell**//
-            tempCell.CONTAINS = 0;
-            tempCell.pieceColor = 0;
-            tempCell.setText("");
+            prevChosenCell.CONTAINS = 0;
+            prevChosenCell.pieceColor = 0;
+            prevChosenCell.setText("");
             turnHandler.nextTurn(); //Change the turn to the next player
             allowedToMove = false;
             resetColAvailCells();
@@ -143,7 +143,7 @@ public class Main {
             }
         }
 
-        tempCell = chosenCell;
+        prevChosenCell = chosenCell;
         allowedToMove = true;
     }
 
