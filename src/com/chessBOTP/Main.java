@@ -171,53 +171,53 @@ public class Main {
                 if (x == 0) {
                     if (y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackRook.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackRook.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackKnight.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKnight.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackBishop.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackBishop.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackQueen.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else {
                         chessboard.getCells()[x][y].CONTAINS = 2;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackKing.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKing.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = 1;
                     }
                 } else if (x == 1) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
-                    chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("BlackPawn.png",55,55)));
+                    chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackPawn.png",55,55)));
                     chessboard.getCells()[x][y].pieceColor = 1;
                 } else if (x == 6) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
-                    chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhitePawn.png",55,55)));
+                    chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhitePawn.png",55,55)));
                     chessboard.getCells()[x][y].pieceColor = -1;
                 } else if (x == 7) {
                     if (y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhiteRook.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteRook.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhiteKnight.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKnight.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhiteBishop.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteBishop.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhiteQueen.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else {
                         chessboard.getCells()[x][y].CONTAINS = 2;
-                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("WhiteKing.png",55,55)));
+                        chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKing.png",55,55)));
                         chessboard.getCells()[x][y].pieceColor = -1;
                     }
                 }

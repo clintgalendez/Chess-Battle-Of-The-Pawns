@@ -103,7 +103,7 @@ public class Chessboard extends JFrame {
         /*
          * The gamebg is background of the game
          */
-        JLabel gamebg = new JLabel(new ImageIcon(createImage("GameBackground.png", 1280,720)));
+        JLabel gamebg = new JLabel(new ImageIcon(createImage("images/GameBackground.png", 1280,720)));
         gamebg.setBounds(0, 0, 1280, 720);
 
         /*
@@ -233,7 +233,7 @@ public class Chessboard extends JFrame {
         pCapturedP2.setHorizontalAlignment(JTextField.CENTER);
         pCapturedP2.setBounds(1041,170,122,15);
 
-        player1Icon = new JLabel(new ImageIcon(createImage("Player1.png",65,65)));
+        player1Icon = new JLabel(new ImageIcon(createImage("images/Player1.png",65,65)));
         player1Icon.setBounds(6,3,90,90);
 
         player1Name = new JLabel("Player 1");
@@ -252,7 +252,7 @@ public class Chessboard extends JFrame {
         namePanelP1.add(player1Icon);
         namePanelP1.add(player1Name);
 
-        player2Icon = new JLabel(new ImageIcon(createImage("Player2.png",65,65)));
+        player2Icon = new JLabel(new ImageIcon(createImage("images/Player2.png",65,65)));
         player2Icon.setBounds(186,3,90,90);
 
         player2Name = new JLabel("Player 2");

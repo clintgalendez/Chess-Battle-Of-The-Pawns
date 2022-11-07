@@ -24,7 +24,7 @@ public class SettingsButton extends JLabel implements MouseListener {
     
 
     SettingsButton(Time clock, JPanel panel) {
-        setIcon(new ImageIcon(createBackground("Settings.png", 60, 60)));
+        setIcon(new ImageIcon(createBackground("images/Settings.png", 60, 60)));
         addMouseListener(this);
         this.panel = panel;
         this.clock = clock;

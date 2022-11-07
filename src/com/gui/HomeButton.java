@@ -25,7 +25,7 @@ public class HomeButton extends JLabel implements MouseListener {
     JPanel panel;
 
     HomeButton(JPanel panel) {
-        setIcon(new ImageIcon(createBackground("Home.png", 60, 60)));
+        setIcon(new ImageIcon(createBackground("images/Home.png", 60, 60)));
         addMouseListener(this);
         this.panel = panel;
     }
