@@ -1,32 +1,15 @@
 package com.gui;
 
 import com.chessBOTP.Cells;
+import com.chessBOTP.Main;
+
 import java.awt.*;
 import javax.swing.*;
 
 public class MainWindow extends JFrame {
-    private JLabel num[] = new JLabel[8];
-    private JLabel letters[] = new JLabel[8];
-    private static Cells[][] cells = new Cells[8][8];
-    private JPanel grid = new JPanel();
+    private final Cells[][] cells = new Cells[8][8];
 
-    /**
-     * Sets the color of the cells that is available to move to. references the
-     * cells array, to change the colors of the cells.
-     * @param moveSets   the move set to be checked
-     * @param chosenCell the cell that was clicked
-     */
-    public static void setColAvailCells(int[][] moveSets, Cells chosenCell) {
-        for (int i = 0; i < moveSets.length; i++) {
-            int x = chosenCell.posX + moveSets[i][0];
-            int y = chosenCell.posY + moveSets[i][1];
-            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
-                cells[x][y].setBackground(Color.GREEN);
-            }
-        }
-    }
-
-    public static Cells[][] getCells() {
+    public Cells[][] getCells() {
         return cells;
     }
 
@@ -39,7 +22,8 @@ public class MainWindow extends JFrame {
       JPanel brdr_num = new JPanel ();
       brdr_num.setLayout(new GridLayout(1, 8));
       for (int x = 0; x<8; x++){
-        num[x] = new JLabel ("" + (x+1));
+          JLabel[] num = new JLabel[8];
+          num[x] = new JLabel ("" + (x+1));
         brdr_num.add(num[x]);
       }
 
@@ -48,16 +32,18 @@ public class MainWindow extends JFrame {
       brdr_let.setLayout(new GridLayout(8, 1));
       for (char i = 'a'; i <= 'h'; i++) {
         int x = 0;
-        letters[x] = new JLabel(""+i);
+          JLabel[] letters = new JLabel[8];
+          letters[x] = new JLabel(""+i);
         brdr_let.add(letters[x]);
-        x++;
       }
 
       //JPanel for cells
-      grid.setLayout(new GridLayout (8, 8));
-      for (int x = 0; x<8; x++){
-        for (int y = 0; y<8; y++){
-          cells[x][y] = new Cells (x, y, 0);
+        JPanel grid = new JPanel();
+        grid.setLayout(new GridLayout (8, 8));
+      for (int y = 0; y<8; y++){
+        for (int x = 0; x<8; x++){
+          cells[x][y] = new Cells (x, y, 0, 0);
+          cells[x][y].addActionListener(Main::buttonClickedHandler);
           grid.add (cells[x][y]);
         }
       }
