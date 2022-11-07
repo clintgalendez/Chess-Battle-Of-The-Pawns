@@ -3,32 +3,31 @@ package com.gui;
 import com.chessBOTP.Cells;
 
 import java.awt.event.MouseListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-
-import java.awt.Image;
-import java.awt.image.BufferedImage;
-import java.awt.event.MouseEvent;
-
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+
+import java.awt.Color;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+
+import java.awt.event.MouseEvent;
+
 
 import java.util.Stack;
 
 public class HomeButton extends JLabel implements MouseListener {
 
-    private Image background;
     Stack<Cells> undo = new Stack<Cells>();
+    JPanel panel;
 
-    HomeButton() {
-        createBackground();
-
-        setIcon(new ImageIcon(background));
-
+    HomeButton(JPanel panel) {
+        setIcon(new ImageIcon(createBackground("Home.png", 60, 60)));
         addMouseListener(this);
+        this.panel = panel;
     }
 
     @Override
@@ -38,34 +37,36 @@ public class HomeButton extends JLabel implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        setBorder(BorderFactory.createLoweredSoftBevelBorder());
+        panel.setBackground(new Color(47, 38, 29));
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        setBorder(BorderFactory.createRaisedSoftBevelBorder());
-        
+        panel.setBackground(new Color(71, 64, 55));
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        setBorder(BorderFactory.createRaisedSoftBevelBorder());
+        panel.setBackground(new Color(71, 64, 55));
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        setBorder(null);
-        
+        panel.setBackground(new Color(214,188,153));
     }
 
-    private final void createBackground() {
+    private Image createBackground(String filename, int width, int height) {
+        Image background = null;
         try {
-            InputStream in = Chessboard.class.getResourceAsStream("sample.png");
+            InputStream in = Chessboard.class.getResourceAsStream(filename);
             BufferedImage bi = ImageIO.read(in);
-            background = bi;
+            ImageIcon icon = new ImageIcon(bi);
+            background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);;
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         }
+
+        return background;
     }
 }
