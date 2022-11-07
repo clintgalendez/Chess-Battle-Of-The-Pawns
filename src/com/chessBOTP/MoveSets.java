@@ -11,7 +11,7 @@ public class MoveSets {
         {1, -1}, {1, 0}, {1, 1}
     };
     private static final int[][] PAWN = {
-        {0, 1}
+        {1, 0}
     };
     private static final int[][] PAWN_ATTACK = {
         {-1, 1}, {1, 1}
@@ -36,40 +36,21 @@ public class MoveSets {
 
     /**
     * Returns the available move set of the selected piece
-    * @param chosenCell the cell that was clicked
+    * @param piece      the piece to get the move set of
     * @return           an int array of the available moves
     */
-    public static int[][] getAvailableMoves(Cells chosenCell) {
-        int[][] moves = null;
-        switch (chosenCell.CONTAINS) {
-            case 1:
-                moves = KNIGHT;
-                break;
-            case 2:
-                moves = KING;
-                break;
-            case 3:
-                moves = PAWN;
-                break;
-            case 4:
-                moves = PAWN_ATTACK;
-                break;
-            case 5:
-                moves = PAWN_START;
-                break;
-            case 6:
-                moves = PAWN_ATTACK_START;
-                break;
-            case 7:
-                moves = BISHOP;
-                break;
-            case 8:
-                moves = ROOK;
-                break;
-            case 9:
-                moves = QUEEN;
-                break;
-        }
-        return moves;
+    public static int[][] getAvailableMoves(int piece) {
+        return switch (piece) {
+            case 1 -> KNIGHT;
+            case 2 -> KING;
+            case 3 -> PAWN;
+            case 4 -> PAWN_ATTACK;
+            case 5 -> PAWN_START;
+            case 6 -> PAWN_ATTACK_START;
+            case 7 -> BISHOP;
+            case 8 -> ROOK;
+            case 9 -> QUEEN;
+            default -> null;
+        };
     }
 }

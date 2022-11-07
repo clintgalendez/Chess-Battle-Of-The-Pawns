@@ -1,10 +1,13 @@
 package com.gui;
 
 import com.chessBOTP.Cells;
+import com.chessBOTP.Main;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -14,24 +17,24 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.LineBorder;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.awt.Font;
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Point;
+import java.awt.GraphicsEnvironment;
 
 
-public class Chessboard implements ActionListener {
+public class Chessboard extends JFrame {
 
     //Class Variables
-
     private JPanel chessBoard, mainPanel, boardPanel;
     
     private RoundedPanel  pieceCapturedP1, pieceCapturedP2, 
@@ -44,9 +47,9 @@ public class Chessboard implements ActionListener {
                    player1Name, player2Name,
                    pCapturedP1, pCapturedP2;
 
-    private Cells cells[][] = new Cells[8][8];
-    private Cells pieceCapturedBoard1[][] = new Cells[4][4];
-    private Cells pieceCapturedBoard2[][] = new Cells[4][4];
+    public final Cells cells[][] = new Cells[8][8];
+    private JButton pieceCapturedBoard1[][] = new JButton[4][4];
+    private JButton pieceCapturedBoard2[][] = new JButton[4][4];
     
     private Time clock;
 
@@ -56,12 +59,29 @@ public class Chessboard implements ActionListener {
 
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
-    private static final Color CAMEO = new Color(214,188,153);
+    private static final Color CAMEO = new Color(214, 188, 153);
 
     public Chessboard() {
         initialize();
+        GUI();
     }
 
+    // Create the user interface of the actual game
+    private void GUI() {
+        setTitle("Masterchess: The Battle of the Pawns");
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+        setLayout(new BorderLayout());
+        getContentPane().add(getLayeredpane());
+
+        Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+        int width = 1280;
+        int height = 720;
+        setBounds(center.x - width / 2, center.y - height / 2, width, height);
+    }
+
+    // Initialize the components
     private void initialize() {
         try {
             UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName());
@@ -83,17 +103,20 @@ public class Chessboard implements ActionListener {
         /*
          * The gamebg is background of the game
          */
-        JLabel gamebg = new JLabel(new ImageIcon(createBackground("GameBackground.png", 1280,720)));
+        JLabel gamebg = new JLabel(new ImageIcon(createImage("GameBackground.png", 1280,720)));
         gamebg.setBounds(0, 0, 1280, 720);
 
         /*
          * The mainPanel consists all of the elements above the gamebg
-         * mainPanel -> {boardPanel, pieceCaptured1, pieceCaptured2, namePanel1, namePanel2, clock}
+         * mainPanel -> {boardPanel, pieceCaptured1, pieceCaptured2, 
+         *               namePanel1, namePanel2, clock,
+         *               undobutton, settingsbutton, homebutton}
          */
         mainPanel = new JPanel(null);
         mainPanel.setOpaque(false);
         mainPanel.setSize(1280,720);
 
+        // Contain the chess gaming board
         boardPanel = new JPanel(new GridBagLayout());
         boardPanel.setBounds(320,50,625,625);
         boardPanel.setBackground(new Color(49,42,33));
@@ -111,6 +134,7 @@ public class Chessboard implements ActionListener {
         gbc.gridy = 0;
         boardPanel.add(topleft, gbc);
         
+        // Create the upper letters of the chessboard
         createLetters(boardPanel, 0, false);
 
         JLabel topright = new JLabel("");
@@ -123,6 +147,7 @@ public class Chessboard implements ActionListener {
         gbc.gridy = 12;
         boardPanel.add(topright, gbc);
 
+        // Create the left side numbers of the chessboard
         createNumbers(boardPanel, 0, false);
 
         JLabel bottomleft = new JLabel("");
@@ -134,10 +159,11 @@ public class Chessboard implements ActionListener {
         gbc.gridy = 11;
         boardPanel.add(bottomleft, gbc);
 
-        fillBoard(cells, 8, true, CALICO, ZEUS,null);
+        // Initialize the cells of the chessboard
+        initChessBoardCells(cells, 8, true, CALICO, ZEUS,null);
 
         /*
-         * The chessBoard is the 8x8 playing board, columns of numbers, and rows of letters
+         * Contains the cells of the chessboard alone
          */
         chessBoard = new JPanel(new GridLayout(0,8));
         chessBoard.setBorder(new LineBorder(CALICO, 2));
@@ -155,8 +181,10 @@ public class Chessboard implements ActionListener {
         gbc.gridheight = 10;
         boardPanel.add(chessBoard, gbc);
 
+        // Create the right side numbers of the chessboard
         createNumbers(boardPanel, 12, true);
 
+        // Create the lower letters of the chessboard
         createLetters(boardPanel, 12, true);
 
         JLabel bottomright = new JLabel("");
@@ -169,14 +197,15 @@ public class Chessboard implements ActionListener {
         pieceCapturedP1 = new RoundedPanel(new GridLayout(0,4),0);
         pieceCapturedP1.setBounds(27,200,270,270);
 
-        fillBoard(pieceCapturedBoard1, 4, false, CALICO, CALICO, ZEUS);
+        initCapturedBoard(pieceCapturedBoard1, ZEUS, CALICO);
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0;j < 4; j++) {
-                pieceCapturedP1.add(pieceCapturedBoard1[j][i]);
+                pieceCapturedP1.add(pieceCapturedBoard1[i][j]);
             }
         }
 
+        // Label for the piece captured board of player 1
         pCapturedP1 = new JLabel("Pieces Captured");
         pCapturedP1.setFont(new Font("Verdana",Font.PLAIN,15));
         pCapturedP1.setForeground(CALICO);
@@ -189,21 +218,22 @@ public class Chessboard implements ActionListener {
         pieceCapturedP2 = new RoundedPanel(new GridLayout(0,4),0);
         pieceCapturedP2.setBounds(967,200,270,270);
 
-        fillBoard(pieceCapturedBoard2, 4, false, ZEUS, ZEUS, CALICO);
+        initCapturedBoard(pieceCapturedBoard2, CALICO, ZEUS);
 
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                pieceCapturedP2.add(pieceCapturedBoard2[j][i]);
+                pieceCapturedP2.add(pieceCapturedBoard2[i][j]);
             }
         }
 
+        // Label of the piece captured board of player 2
         pCapturedP2 = new JLabel("Pieces Captured");
         pCapturedP2.setFont(new Font("Verdana",Font.PLAIN,15));
         pCapturedP2.setForeground(CALICO);
         pCapturedP2.setHorizontalAlignment(JTextField.CENTER);
         pCapturedP2.setBounds(1041,170,122,15);
 
-        player1Icon = new JLabel(new ImageIcon(createBackground("Player1.png",65,65)));
+        player1Icon = new JLabel(new ImageIcon(createImage("Player1.png",65,65)));
         player1Icon.setBounds(6,3,90,90);
 
         player1Name = new JLabel("Player 1");
@@ -218,10 +248,11 @@ public class Chessboard implements ActionListener {
         namePanelP1 = new RoundedPanel(null,10);
         namePanelP1.setBackground(CAMEO);
         namePanelP1.setBounds(18,25,289,100);
+        namePanelP1.setBorder(new LineBorder(ZEUS, 2, true));
         namePanelP1.add(player1Icon);
         namePanelP1.add(player1Name);
 
-        player2Icon = new JLabel(new ImageIcon(createBackground("Player2.png",65,65)));
+        player2Icon = new JLabel(new ImageIcon(createImage("Player2.png",65,65)));
         player2Icon.setBounds(186,3,90,90);
 
         player2Name = new JLabel("Player 2");
@@ -236,6 +267,7 @@ public class Chessboard implements ActionListener {
         namePanelP2 = new RoundedPanel(null, 10);
         namePanelP2.setBackground(CAMEO);
         namePanelP2.setBounds(958,25,289,100);
+        namePanelP2.setBorder(new LineBorder(CALICO, 2, true));
         namePanelP2.add(player2Icon);
         namePanelP2.add(player2Name);
 
@@ -254,8 +286,6 @@ public class Chessboard implements ActionListener {
 
         undoPanel.add(undobutton);
 
-        
-
         homePanel = new RoundedPanel(null, 10);
         homePanel.setBackground(CAMEO);
         homePanel.setBounds(1184,600,60,60);
@@ -269,7 +299,7 @@ public class Chessboard implements ActionListener {
         settingsPanel.setBackground(CAMEO);
         settingsPanel.setBounds(1184,530,60,60);
         
-        settingsbutton = new SettingsButton(settingsPanel);
+        settingsbutton = new SettingsButton(clock, settingsPanel);
         settingsbutton.setBounds(0,0,60,60);
         
         settingsPanel.add(settingsbutton);
@@ -292,12 +322,8 @@ public class Chessboard implements ActionListener {
         clock.timer.start();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-
-    }
-
-    private Image createBackground(String filename, int width, int height) {
+    // Method for initializing images
+    public Image createImage(String filename, int width, int height) {
         Image background = null;
         try {
             InputStream in = Chessboard.class.getResourceAsStream(filename);
@@ -312,16 +338,18 @@ public class Chessboard implements ActionListener {
         return background;
     }
 
-    private void fillBoard(Cells[][] board, int size, boolean isEnabled, Color color1, Color color2, Color color3) {
+    // Method for initializing chessboard cells
+    public void initChessBoardCells(Cells[][] board, int size, boolean isEnabled, Color color1, Color color2, Color color3) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
 
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                    Cells b = new Cells(i, j, 0);
+                    Cells b = new Cells(j, i, 0, 0);
                     b.setMargin(buttonMargin);
                     b.setEnabled(isEnabled);
+                    b.setFocusable(false);
                     b.setBorder(new LineBorder(color3, 1, false));
-                    b.addActionListener(this);
+                    b.addActionListener(Main::buttonClickedHandler);
                     
                     ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
                             BufferedImage.TYPE_INT_ARGB));
@@ -333,11 +361,48 @@ public class Chessboard implements ActionListener {
                     } else {
                         b.setBackground(color2);
                     }
+                    board[j][i] = b;
+                }
+            }
+    }
+
+    // Method for initializing captured board cells
+    public void initCapturedBoard(JButton[][] board, Color color1, Color color2) {
+        Insets buttonMargin = new Insets(0, 0, 0, 0);
+
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    JButton b = new JButton();
+                    b.setMargin(buttonMargin);
+                    b.setEnabled(false);
+                    b.setFocusable(false);
+                    b.setBorder(new LineBorder(color1, 1, false));
+                    b.addActionListener(Main::buttonClickedHandler);
+                    
+                    ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
+                            BufferedImage.TYPE_INT_ARGB));
+                    b.setIcon(icon);
+                    b.setBackground(color2);
                     board[i][j] = b;
                 }
             }
     }
 
+    // Method for repainting cells of the chessboard
+    public void repaintBoard(Cells[][] board) {
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (((j % 2 == 1) && (i % 2 == 1))
+                        || ((j % 2 == 0) && (i % 2 == 0))) {
+                    board[i][j].setBackground(CALICO);
+                } else {
+                    board[i][j].setBackground(ZEUS);
+                }
+            }
+        }
+    }
+
+    // Method for creating the chessboard letters
     private void createLetters(JPanel boardPanel, int row, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
         String letters = "ABCDEFGH";
@@ -365,6 +430,7 @@ public class Chessboard implements ActionListener {
         }
     }
 
+    // Method for creating the chessboard numbers
     private void createNumbers(JPanel boardPanel, int column, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
         int num;
@@ -387,18 +453,9 @@ public class Chessboard implements ActionListener {
         }
     }
     
+
     public JComponent getLayeredpane() {
         return layeredPane;
-    }
-
-    public void setColAvailCells(int[][] moveSets, Cells chosenCell) {
-        for (int i = 0; i < moveSets.length; i++) {
-            int x = chosenCell.posX + moveSets[i][0];
-            int y = chosenCell.posY + moveSets[i][1];
-            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
-                cells[x][y].setBackground(Color.GREEN);
-            }
-        }
     }
 
     public Cells[][] getCells() {

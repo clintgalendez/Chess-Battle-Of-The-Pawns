@@ -18,4 +18,8 @@ public class TurnBasedHandler {
     public Players getCurrentPlayer() {
         return currentPlayer;
     }
+
+    public Players getNextPlayer() {
+        return nextPlayer;
+    }
 }

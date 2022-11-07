@@ -1,38 +1,44 @@
 package com.gui;
 
-import com.chessBOTP.Cells;
-
 import java.awt.event.MouseListener;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import java.awt.Color;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.awt.Point;
 
 import java.awt.event.MouseEvent;
 
-
-import java.util.Stack;
-
 public class SettingsButton extends JLabel implements MouseListener {
 
-    Stack<Cells> undo = new Stack<Cells>();
     JPanel panel;
+    Time clock;
+    
 
-    SettingsButton(JPanel panel) {
+    SettingsButton(Time clock, JPanel panel) {
         setIcon(new ImageIcon(createBackground("Settings.png", 60, 60)));
         addMouseListener(this);
         this.panel = panel;
+        this.clock = clock;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+        clock.timer.stop();
+        JDialog settingsDialog = new JDialog();
+        Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
+        int width = 700;
+        int height = 500;
+        settingsDialog.setBounds(center.x - width / 2, center.y - height / 2, width, height);
+        settingsDialog.setVisible(true);
     }
 
     @Override
