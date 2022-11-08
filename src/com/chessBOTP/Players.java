@@ -38,6 +38,11 @@ public class Players {
             }
         }
     }
+
+    public Stack<Cells> getMove() {
+        return playerMoves;
+    }
+
     public boolean isCheckMate() {
         return isCheckMate;
     }

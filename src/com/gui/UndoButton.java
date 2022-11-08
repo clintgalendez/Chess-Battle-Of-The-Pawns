@@ -1,6 +1,7 @@
 package com.gui;
 
 import com.chessBOTP.Cells;
+import com.chessBOTP.Main;
 
 import java.awt.event.MouseListener;
 import java.io.InputStream;
@@ -32,7 +33,7 @@ public class UndoButton extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        
+        Main.undo();
     }
 
     @Override

@@ -4,6 +4,7 @@ import com.chessBOTP.Cells;
 import com.chessBOTP.Main;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -344,7 +345,7 @@ public class Chessboard extends JFrame {
 
             for (int i = 0; i < size; i++) {
                 for (int j = 0; j < size; j++) {
-                    Cells b = new Cells(j, i, 0, 0);
+                    Cells b = new Cells(j, i, 0, 0,null);
                     b.setMargin(buttonMargin);
                     b.setEnabled(isEnabled);
                     b.setFocusable(false);
@@ -366,6 +367,21 @@ public class Chessboard extends JFrame {
             }
     }
 
+    public void addToCapturedBoard(Icon icon, int colorPiece, int i, int j, int m, int n) {
+        
+        if (colorPiece == 1) {
+            pieceCapturedBoard1[i][j].setIcon(icon);
+            pieceCapturedBoard1[i][j].setDisabledIcon(icon);
+        } else {
+            pieceCapturedBoard2[m][n].setIcon(icon);
+            pieceCapturedBoard2[m][n].setDisabledIcon(icon);
+        }
+    }
+
+    public void getCapturedBoard1() {
+
+    }
+
     // Method for initializing captured board cells
     public void initCapturedBoard(JButton[][] board, Color color1, Color color2) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
@@ -377,8 +393,6 @@ public class Chessboard extends JFrame {
                     b.setEnabled(false);
                     b.setFocusable(false);
                     b.setBorder(new LineBorder(color1, 1, false));
-                    b.addActionListener(Main::buttonClickedHandler);
-                    
                     ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
                             BufferedImage.TYPE_INT_ARGB));
                     b.setIcon(icon);
