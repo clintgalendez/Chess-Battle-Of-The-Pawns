@@ -2,9 +2,9 @@ package com.gui;
 
 import com.chessBOTP.Cells;
 import com.chessBOTP.Main;
+import com.chessBOTP.Players;
 
 import javax.imageio.ImageIO;
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -367,19 +367,30 @@ public class Chessboard extends JFrame {
             }
     }
 
-    public void addToCapturedBoard(Icon icon, int colorPiece, int i, int j, int m, int n) {
-        
-        if (colorPiece == 1) {
-            pieceCapturedBoard1[i][j].setIcon(icon);
-            pieceCapturedBoard1[i][j].setDisabledIcon(icon);
+    public void addToCapturedBoard(Cells chosenCell, int i, int j, int m, int n) {
+        if(chosenCell.pieceColor == 1) {
+            pieceCapturedBoard1[i][j].setIcon(chosenCell.piece);
+            pieceCapturedBoard1[i][j].setDisabledIcon(chosenCell.piece);
         } else {
-            pieceCapturedBoard2[m][n].setIcon(icon);
-            pieceCapturedBoard2[m][n].setDisabledIcon(icon);
+            pieceCapturedBoard2[m][n].setIcon(chosenCell.piece);
+            pieceCapturedBoard2[m][n].setDisabledIcon(chosenCell.piece);
         }
     }
 
-    public void getCapturedBoard1() {
+    public void removeFromCapturedBoard(Players player, int y, int x) {
+        if(player.getPlayerColor() == 1) {
+            pieceCapturedBoard1[y][x].setIcon(null);
+        } else {
+            pieceCapturedBoard2[y][x].setIcon(null);
+        }
+    }
 
+    public JButton[][] getCapturedBoard(Players player) {
+        if (player.getPlayerColor() == -1) {
+            return pieceCapturedBoard1;
+        } else {
+            return pieceCapturedBoard2;
+        }
     }
 
     // Method for initializing captured board cells
@@ -400,20 +411,6 @@ public class Chessboard extends JFrame {
                     board[i][j] = b;
                 }
             }
-    }
-
-    // Method for repainting cells of the chessboard
-    public void repaintBoard(Cells[][] board) {
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {
-                if (((j % 2 == 1) && (i % 2 == 1))
-                        || ((j % 2 == 0) && (i % 2 == 0))) {
-                    board[i][j].setBackground(CALICO);
-                } else {
-                    board[i][j].setBackground(ZEUS);
-                }
-            }
-        }
     }
 
     // Method for creating the chessboard letters

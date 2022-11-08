@@ -47,7 +47,7 @@ public class Main {
         }
 
         if (prevChosenCell == chosenCell) {
-            chessboard.repaintBoard(chessboard.getCells());
+            resetColAvailCells(chessboard.getCells());
             prevChosenCell = null;
             allowedToMove = false;
             return;
@@ -70,7 +70,7 @@ public class Main {
             }
 
             if (chosenCell.getIcon() != null) {
-                chessboard.addToCapturedBoard(chosenCell.getIcon(), chosenCell.pieceColor, i, j, m , n);
+                chessboard.addToCapturedBoard(chosenCell, i, j, m , n);
                 if (chosenCell.pieceColor == 1) {
                     j++;
                     if (j > 3) {
@@ -104,7 +104,7 @@ public class Main {
             turnHandler.getCurrentPlayer().addMove(prevChosenCell);
             turnHandler.nextTurn(); //Change the turn to the next player
             allowedToMove = false;
-            chessboard.repaintBoard(chessboard.getCells());
+            resetColAvailCells(chessboard.getCells());
             return;
         }
 
@@ -178,10 +178,15 @@ public class Main {
         allowedToMove = true;
     }
 
-    public static void resetColAvailCells() {
+    public static void resetColAvailCells(Cells[][] board) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                chessboard.getCells()[i][j].setBackground(Color.WHITE);
+                if (((j % 2 == 1) && (i % 2 == 1))
+                        || ((j % 2 == 0) && (i % 2 == 0))) {
+                    board[i][j].setBackground(new Color(224, 190, 145));
+                } else {
+                    board[i][j].setBackground(new Color(47, 38, 29));
+                }
             }
         }
     }
@@ -266,7 +271,7 @@ public class Main {
         if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
             return;
 
-        chessboard.repaintBoard(chessboard.getCells());
+        resetColAvailCells(chessboard.getCells());
         prevChosenCell = null;
         allowedToMove = false;
 
@@ -286,5 +291,30 @@ public class Main {
         currentCell.setIcon(chosenCell.piece);
         currentCell.piece = chosenCell.piece;
         currentCell.pieceColor = chosenCell.pieceColor;
+
+        if (currentCell.getIcon() != null) {
+            int y, x;
+            if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
+                j--;
+                if (j < 0) {
+                    i--;
+                    j = 3;
+                }
+                y = i;
+                x = j;
+                
+            } else {
+                n--;
+                if (n < 0) {
+                    m--;
+                    n = 3;
+                } 
+                y = m;
+                x = n;
+            }
+
+            if(y != -1 && x != -1 && chessboard.getCapturedBoard(turnHandler.getCurrentPlayer())[y][x].getIcon() != null)
+                chessboard.removeFromCapturedBoard(turnHandler.getNextPlayer(), y, x);
+        }
     }
 }
