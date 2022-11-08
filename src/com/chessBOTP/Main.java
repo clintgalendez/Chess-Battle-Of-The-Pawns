@@ -35,7 +35,7 @@ public class Main {
         //**Flow of the Program**//
         player1 = new Players("Player 1", -1); //Create Player 1
         player2 = new Players("Player 2", 1); //Create Player 2
-        turnHandler = new TurnBasedHandler(player1, player2); //Create Turn Handler
+        turnHandler = new TurnBasedHandler(player1, player2, chessboard); //Create Turn Handler
         gameStarted = true;
     }
 
@@ -103,6 +103,7 @@ public class Main {
             prevChosenCell.piece = prevChosenCell.getIcon();
             turnHandler.getCurrentPlayer().addMove(prevChosenCell);
             turnHandler.nextTurn(); //Change the turn to the next player
+
             allowedToMove = false;
             resetColAvailCells(chessboard.getCells());
             return;
@@ -191,6 +192,57 @@ public class Main {
         }
     }
 
+    public static void undo() {
+        if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
+            return;
+
+        resetColAvailCells(chessboard.getCells());
+        prevChosenCell = null;
+        allowedToMove = false;
+
+        turnHandler.nextTurn();
+        Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
+
+        Cells prevCell = prevMoves.pop();
+        Cells currentCell = prevMoves.pop();
+        Cells chosenCell = prevMoves.pop();
+
+        prevCell.CONTAINS = currentCell.CONTAINS;
+        prevCell.setIcon(currentCell.piece);
+        prevCell.piece = currentCell.piece;
+        prevCell.pieceColor = currentCell.pieceColor;
+
+        currentCell.CONTAINS = chosenCell.CONTAINS;
+        currentCell.setIcon(chosenCell.piece);
+        currentCell.piece = chosenCell.piece;
+        currentCell.pieceColor = chosenCell.pieceColor;
+
+        if (currentCell.getIcon() != null) {
+            int y, x;
+            if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
+                j--;
+                if (j < 0) {
+                    i--;
+                    j = 3;
+                }
+                y = i;
+                x = j;
+                
+            } else {
+                n--;
+                if (n < 0) {
+                    m--;
+                    n = 3;
+                } 
+                y = m;
+                x = n;
+            }
+
+            if(chessboard.getCapturedBoard(turnHandler.getCurrentPlayer())[y][x].getIcon() != null)
+                chessboard.removeFromCapturedBoard(turnHandler.getNextPlayer(), y, x);
+        }
+    }
+
     public static void pause() {
     }
 
@@ -264,57 +316,6 @@ public class Main {
                     }
                 }
             }
-        }
-    }
-
-    public static void undo() {
-        if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
-            return;
-
-        resetColAvailCells(chessboard.getCells());
-        prevChosenCell = null;
-        allowedToMove = false;
-
-        turnHandler.nextTurn();
-        Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
-
-        Cells prevCell = prevMoves.pop();
-        Cells currentCell = prevMoves.pop();
-        Cells chosenCell = prevMoves.pop();
-
-        prevCell.CONTAINS = currentCell.CONTAINS;
-        prevCell.setIcon(currentCell.piece);
-        prevCell.piece = currentCell.piece;
-        prevCell.pieceColor = turnHandler.getCurrentPlayer().getPlayerColor();
-
-        currentCell.CONTAINS = chosenCell.CONTAINS;
-        currentCell.setIcon(chosenCell.piece);
-        currentCell.piece = chosenCell.piece;
-        currentCell.pieceColor = chosenCell.pieceColor;
-
-        if (currentCell.getIcon() != null) {
-            int y, x;
-            if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
-                j--;
-                if (j < 0) {
-                    i--;
-                    j = 3;
-                }
-                y = i;
-                x = j;
-                
-            } else {
-                n--;
-                if (n < 0) {
-                    m--;
-                    n = 3;
-                } 
-                y = m;
-                x = n;
-            }
-
-            if(y != -1 && x != -1 && chessboard.getCapturedBoard(turnHandler.getCurrentPlayer())[y][x].getIcon() != null)
-                chessboard.removeFromCapturedBoard(turnHandler.getNextPlayer(), y, x);
         }
     }
 }

@@ -367,52 +367,6 @@ public class Chessboard extends JFrame {
             }
     }
 
-    public void addToCapturedBoard(Cells chosenCell, int i, int j, int m, int n) {
-        if(chosenCell.pieceColor == 1) {
-            pieceCapturedBoard1[i][j].setIcon(chosenCell.piece);
-            pieceCapturedBoard1[i][j].setDisabledIcon(chosenCell.piece);
-        } else {
-            pieceCapturedBoard2[m][n].setIcon(chosenCell.piece);
-            pieceCapturedBoard2[m][n].setDisabledIcon(chosenCell.piece);
-        }
-    }
-
-    public void removeFromCapturedBoard(Players player, int y, int x) {
-        if(player.getPlayerColor() == 1) {
-            pieceCapturedBoard1[y][x].setIcon(null);
-        } else {
-            pieceCapturedBoard2[y][x].setIcon(null);
-        }
-    }
-
-    public JButton[][] getCapturedBoard(Players player) {
-        if (player.getPlayerColor() == -1) {
-            return pieceCapturedBoard1;
-        } else {
-            return pieceCapturedBoard2;
-        }
-    }
-
-    // Method for initializing captured board cells
-    public void initCapturedBoard(JButton[][] board, Color color1, Color color2) {
-        Insets buttonMargin = new Insets(0, 0, 0, 0);
-
-            for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < 4; j++) {
-                    JButton b = new JButton();
-                    b.setMargin(buttonMargin);
-                    b.setEnabled(false);
-                    b.setFocusable(false);
-                    b.setBorder(new LineBorder(color1, 1, false));
-                    ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
-                            BufferedImage.TYPE_INT_ARGB));
-                    b.setIcon(icon);
-                    b.setBackground(color2);
-                    board[i][j] = b;
-                }
-            }
-    }
-
     // Method for creating the chessboard letters
     private void createLetters(JPanel boardPanel, int row, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
@@ -463,7 +417,60 @@ public class Chessboard extends JFrame {
             boardPanel.add(number,gbc);
         }
     }
-    
+
+    // Method for initializing captured board cells
+    public void initCapturedBoard(JButton[][] board, Color color1, Color color2) {
+        Insets buttonMargin = new Insets(0, 0, 0, 0);
+
+            for (int i = 0; i < 4; i++) {
+                for (int j = 0; j < 4; j++) {
+                    JButton b = new JButton();
+                    b.setMargin(buttonMargin);
+                    b.setEnabled(false);
+                    b.setFocusable(false);
+                    b.setBorder(new LineBorder(color1, 1, false));
+                    ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
+                            BufferedImage.TYPE_INT_ARGB));
+                    b.setIcon(icon);
+                    b.setBackground(color2);
+                    board[i][j] = b;
+                }
+            }
+    }
+
+    public void addToCapturedBoard(Cells chosenCell, int i, int j, int m, int n) {
+        if(chosenCell.pieceColor == 1) {
+            pieceCapturedBoard1[i][j].setIcon(chosenCell.piece);
+            pieceCapturedBoard1[i][j].setDisabledIcon(chosenCell.piece);
+        } else {
+            pieceCapturedBoard2[m][n].setIcon(chosenCell.piece);
+            pieceCapturedBoard2[m][n].setDisabledIcon(chosenCell.piece);
+        }
+    }
+
+    public void removeFromCapturedBoard(Players player, int y, int x) {
+        if(player.getPlayerColor() == 1) {
+            pieceCapturedBoard1[y][x].setIcon(null);
+        } else {
+            pieceCapturedBoard2[y][x].setIcon(null);
+        }
+    }
+
+    public JButton[][] getCapturedBoard(Players player) {
+        if (player.getPlayerColor() == -1) {
+            return pieceCapturedBoard1;
+        } else {
+            return pieceCapturedBoard2;
+        }
+    }
+
+    public RoundedPanel getNamePanel(Players player) {
+        if (player.getPlayerColor() == -1) {
+            return namePanelP1;
+        } else {
+            return namePanelP2;
+        }
+    }
 
     public JComponent getLayeredpane() {
         return layeredPane;

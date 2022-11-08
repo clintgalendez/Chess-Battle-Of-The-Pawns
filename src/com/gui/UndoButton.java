@@ -26,7 +26,7 @@ public class UndoButton extends JLabel implements MouseListener {
     JPanel panel;
 
     UndoButton(JPanel panel) {
-        setIcon(new ImageIcon(createBackground("images/Undo.png", 60, 60)));
+        setIcon(new ImageIcon(createImage("images/Undo.png", 60, 60)));
         addMouseListener(this);
         this.panel = panel;
     }
@@ -56,7 +56,7 @@ public class UndoButton extends JLabel implements MouseListener {
         panel.setBackground(new Color(214,188,153));
     }
 
-    private Image createBackground(String filename, int width, int height) {
+    private Image createImage(String filename, int width, int height) {
         Image background = null;
         try {
             InputStream in = Chessboard.class.getResourceAsStream(filename);
