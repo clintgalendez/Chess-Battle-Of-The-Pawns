@@ -4,6 +4,7 @@ import com.gui.Chessboard;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.util.Stack;
 
 import javax.swing.ImageIcon;
 
@@ -15,6 +16,7 @@ public class Main {
     static TurnBasedHandler turnHandler;
     static boolean allowedToMove = false;
     static Cells prevChosenCell;
+    static int i = 0, j = 0, m = 0, n = 0;
 
     public static void main(String[] args) {
         //Create another thread for MainWindow
@@ -67,16 +69,39 @@ public class Main {
                 turnHandler.getCurrentPlayer().addDestroyedPiece(chosenCell.CONTAINS);
             }
 
+            if (chosenCell.getIcon() != null) {
+                chessboard.addToCapturedBoard(chosenCell.getIcon(), chosenCell.pieceColor, i, j, m , n);
+                if (chosenCell.pieceColor == 1) {
+                    j++;
+                    if (j > 3) {
+                        i++;
+                        j = 0;
+                    } 
+                } else if(chosenCell.pieceColor == -1) {
+                    n++;
+                    if (n > 3) {
+                        m++;
+                        n = 0;
+                    }
+                }
+            }
+
+            Cells cell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
+            turnHandler.getCurrentPlayer().addMove(cell);
+
             //**Move the Piece**//
             chosenCell.CONTAINS = prevChosenCell.CONTAINS; //The previous cell will now move to the new cell
             chosenCell.pieceColor = prevChosenCell.pieceColor; //The newly clicked cell will contain the color of the previous cell
             chosenCell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            chosenCell.piece = chosenCell.getIcon();
             turnHandler.getCurrentPlayer().addMove(chosenCell); //Add the move to the current player's moves
 
             //**Reset The previous Cell**//
             prevChosenCell.CONTAINS = 0;
             prevChosenCell.pieceColor = 0;
             prevChosenCell.setIcon(null);
+            prevChosenCell.piece = prevChosenCell.getIcon();
+            turnHandler.getCurrentPlayer().addMove(prevChosenCell);
             turnHandler.nextTurn(); //Change the turn to the next player
             allowedToMove = false;
             chessboard.repaintBoard(chessboard.getCells());
@@ -172,56 +197,94 @@ public class Main {
                     if (y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackRook.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKnight.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackBishop.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else if (y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     } else {
                         chessboard.getCells()[x][y].CONTAINS = 2;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKing.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     }
                 } else if (x == 1) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackPawn.png",55,55)));
+                    chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = 1;
                 } else if (x == 6) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhitePawn.png",55,55)));
+                    chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = -1;
                 } else if (x == 7) {
                     if (y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteRook.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKnight.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteBishop.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else if (y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
                     } else {
                         chessboard.getCells()[x][y].CONTAINS = 2;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKing.png",55,55)));
+                        chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
                     }
                 }
             }
         }
+    }
+
+    public static void undo() {
+        if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
+            return;
+
+        chessboard.repaintBoard(chessboard.getCells());
+        prevChosenCell = null;
+        allowedToMove = false;
+
+        turnHandler.nextTurn();
+        Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
+
+        Cells prevCell = prevMoves.pop();
+        Cells currentCell = prevMoves.pop();
+        Cells chosenCell = prevMoves.pop();
+
+        prevCell.CONTAINS = currentCell.CONTAINS;
+        prevCell.setIcon(currentCell.piece);
+        prevCell.piece = currentCell.piece;
+        prevCell.pieceColor = turnHandler.getCurrentPlayer().getPlayerColor();
+
+        currentCell.CONTAINS = chosenCell.CONTAINS;
+        currentCell.setIcon(chosenCell.piece);
+        currentCell.piece = chosenCell.piece;
+        currentCell.pieceColor = chosenCell.pieceColor;
     }
 }
