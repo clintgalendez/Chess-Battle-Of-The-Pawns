@@ -1,3 +1,5 @@
+// Mechanics of the game
+
 package com.chessBOTP;
 
 import com.gui.Chessboard;
@@ -10,32 +12,48 @@ import javax.swing.ImageIcon;
 
 public class Main {
     static Chessboard chessboard = new Chessboard();
+    
     static Players player1;
     static Players player2;
-    static boolean gameStarted = false;
+
     static TurnBasedHandler turnHandler;
+
+    static boolean gameStarted = false;
     static boolean allowedToMove = false;
+    static boolean isCheck = false;
+    static boolean isSuggesting = false;
+
     static Cells prevChosenCell;
-    static int i = 0, j = 0, m = 0, n = 0;
+
+    static int checkedPiece;
+    static int[] coordinates = {0, 0, 0, 0};
 
     public static void main(String[] args) {
         //Create another thread for MainWindow
-        EventQueue.invokeLater(() -> {
-            try {
-                chessboard.setVisible(true);
-                arrangeBoard();
-                play();
-            } catch (Exception e) {
-                e.printStackTrace();
+        Thread GUI = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                chessboard.GUI();
             }
         });
+
+        //Create another thread for Gameplay
+        Thread game = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                arrangeBoard();
+                play();
+            }
+        }); 
+        GUI.start();
+        game.start();
     }
 
     public static void play() {
-        //**Flow of the Program**//
-        player1 = new Players("Player 1", -1); //Create Player 1
-        player2 = new Players("Player 2", 1); //Create Player 2
-        turnHandler = new TurnBasedHandler(player1, player2, chessboard); //Create Turn Handler
+        // Flow of the Program 
+        player1 = new Players("Player 1", -1); // Create Player 1
+        player2 = new Players("Player 2", 1); // Create Player 2
+        turnHandler = new TurnBasedHandler(player1, player2, chessboard); // Create Turn Handler
         gameStarted = true;
     }
 
@@ -50,59 +68,68 @@ public class Main {
             resetColAvailCells(chessboard.getCells());
             prevChosenCell = null;
             allowedToMove = false;
+            isSuggesting = false;
             return;
         }
 
-        //Check if the cell is now available to choose among the available cells
+        // Check if the cell is now available to choose among the available cells
         if (allowedToMove) {
+            isCheck = false;
             /*
-            get the color of the cell that is clicked and check if it is green
-            for green means that it is available to be moved to.
+             * get the color of the cell that is clicked and check if it is green
+             * for green means that it is available to be moved to.
              */
             Color color = chosenCell.getBackground();
-            if (color != Color.GREEN) {
-                return;
-            }
+            if (color != Color.GREEN) return;
 
-            //Check if the cell is occupied by another player, and if it is, add it to the destroyed pieces
-            if (turnHandler.getCurrentPlayer().getPlayerColor() == turnHandler.getNextPlayer().getPlayerColor()) {
-                turnHandler.getCurrentPlayer().addDestroyedPiece(chosenCell.CONTAINS);
-            }
-
+            /*
+             * get the icon of the cell that is clicked and check if it is a piece
+             * for it means that it will be added to current player's captured board
+             */
             if (chosenCell.getIcon() != null) {
-                chessboard.addToCapturedBoard(chosenCell, i, j, m , n);
+                chessboard.addToCapturedBoard(chosenCell, coordinates);
+
                 if (chosenCell.pieceColor == 1) {
-                    j++;
-                    if (j > 3) {
-                        i++;
-                        j = 0;
+                    coordinates[1]++;
+                    if (coordinates[1] > 3) {
+                        coordinates[0]++;
+                        coordinates[1] = 0;
                     } 
                 } else if(chosenCell.pieceColor == -1) {
-                    n++;
-                    if (n > 3) {
-                        m++;
-                        n = 0;
+                    coordinates[3]++;
+                    if (coordinates[3] > 3) {
+                        coordinates[2]++;
+                        coordinates[3] = 0;
                     }
                 }
             }
 
+            // Store chosen cell piece properties for undo purposes
             Cells cell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
             turnHandler.getCurrentPlayer().addMove(cell);
 
-            //**Move the Piece**//
+            // Move the clicked piece to the chosen cell
             chosenCell.CONTAINS = prevChosenCell.CONTAINS; //The previous cell will now move to the new cell
-            chosenCell.pieceColor = prevChosenCell.pieceColor; //The newly clicked cell will contain the color of the previous cell
-            chosenCell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            chosenCell.pieceColor = prevChosenCell.pieceColor; //The newly clicked cell will contain the color property of the previous cell
+            chosenCell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the icon of the previous cell
             chosenCell.piece = chosenCell.getIcon();
+
+            // Store the properties of the previously chosen cell for undo purposes
             turnHandler.getCurrentPlayer().addMove(chosenCell); //Add the move to the current player's moves
 
-            //**Reset The previous Cell**//
+            // Reset the previously clicked cell
             prevChosenCell.CONTAINS = 0;
             prevChosenCell.pieceColor = 0;
             prevChosenCell.setIcon(null);
             prevChosenCell.piece = prevChosenCell.getIcon();
             turnHandler.getCurrentPlayer().addMove(prevChosenCell);
+
+            // Calculate future moves if they result to a check
+            isSuggesting = false;
+            calculateFutureMove(chessboard.getCells(), isSuggesting);
+
             turnHandler.nextTurn(); //Change the turn to the next player
+            check();
 
             allowedToMove = false;
             resetColAvailCells(chessboard.getCells());
@@ -111,7 +138,10 @@ public class Main {
 
         if (turnHandler.getCurrentPlayer().getPlayerColor() == chosenCell.pieceColor) {
             chosenCell.setBackground(Color.YELLOW);
-            setColAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor());
+            isSuggesting = true;
+            setColAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor(), isSuggesting);
+            prevChosenCell = chosenCell;
+            allowedToMove = true;
         }
     }
 
@@ -125,7 +155,7 @@ public class Main {
         return null;
     }
 
-    public static void setColAvailCells(Cells chosenCell, int currentColorPiece) {
+    public static void setColAvailCells(Cells chosenCell, int currentColorPiece, boolean isSuggesting) {
         int piece = chosenCell.CONTAINS;
         Cells futureCells;
 
@@ -142,7 +172,15 @@ public class Main {
                     continue;
                 }
 
-                futureCells.setBackground(Color.GREEN);
+                if(isSuggesting) {
+                    futureCells.setBackground(Color.GREEN);
+                } else {
+                    if(futureCells.CONTAINS == 2) {
+                        checkedPiece = futureCells.pieceColor;
+                        isCheck = true;
+                        return;
+                    }
+                }
 
                 if (futureCells.CONTAINS != 0) {
                     continue;
@@ -154,7 +192,15 @@ public class Main {
                         break;
                     }
 
-                    futureCells.setBackground(Color.GREEN);
+                    if(isSuggesting) {
+                        futureCells.setBackground(Color.GREEN);
+                    } else {
+                        if(futureCells.CONTAINS == 2) {
+                            checkedPiece = futureCells.pieceColor;
+                            isCheck = true;
+                            return;
+                        }
+                    }
 
                     if (futureCells.CONTAINS != 0) {
                         break;
@@ -171,12 +217,29 @@ public class Main {
                     continue;
                 }
 
-                futureCells.setBackground(Color.GREEN);
+                if(isSuggesting) {
+                    futureCells.setBackground(Color.GREEN);
+                } else {
+                    if(futureCells.CONTAINS == 2) {
+                        checkedPiece = futureCells.pieceColor;
+                        isCheck = true;
+                        return;
+                    }
+                }
+
+                if (futureCells.CONTAINS != 0) {
+                    continue;
+                }
             }
         }
+    }
 
-        prevChosenCell = chosenCell;
-        allowedToMove = true;
+    public static void calculateFutureMove(Cells[][] board, boolean isSuggesting) {
+        for(Cells[] cells : board) {
+            for(Cells cell : cells ) {
+                setColAvailCells(cell, cell.pieceColor, isSuggesting);
+            }
+        }
     }
 
     public static void resetColAvailCells(Cells[][] board) {
@@ -192,13 +255,30 @@ public class Main {
         }
     }
 
+    public static void check() {
+        if(!isCheck) {
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.GREEN);
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
+        } else {
+            if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) {
+                undo();
+            }
+
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW);
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
+        }
+    }
+
     public static void undo() {
         if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
             return;
+        
+        isCheck = false;
 
         resetColAvailCells(chessboard.getCells());
         prevChosenCell = null;
         allowedToMove = false;
+        isSuggesting = false;
 
         turnHandler.nextTurn();
         Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
@@ -217,33 +297,36 @@ public class Main {
         currentCell.piece = chosenCell.piece;
         currentCell.pieceColor = chosenCell.pieceColor;
 
+        
         if (currentCell.getIcon() != null) {
             int y, x;
             if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
-                j--;
-                if (j < 0) {
-                    i--;
-                    j = 3;
+                coordinates[1]--;
+                if (coordinates[1] < 0) {
+                    coordinates[0]--;
+                    coordinates[1] = 3;
                 }
-                y = i;
-                x = j;
+                y = coordinates[0];
+                x = coordinates[1];
                 
             } else {
-                n--;
-                if (n < 0) {
-                    m--;
-                    n = 3;
+                coordinates[3]--;
+                if (coordinates[3] < 0) {
+                    coordinates[2]--;
+                    coordinates[3] = 3;
                 } 
-                y = m;
-                x = n;
+                y = coordinates[2];
+                x = coordinates[3];
             }
 
             if(chessboard.getCapturedBoard(turnHandler.getCurrentPlayer())[y][x].getIcon() != null)
                 chessboard.removeFromCapturedBoard(turnHandler.getNextPlayer(), y, x);
-        }
-    }
 
-    public static void pause() {
+            
+        } 
+        
+        calculateFutureMove(chessboard.getCells(), isSuggesting);
+        check();
     }
 
     public static void arrangeBoard() {

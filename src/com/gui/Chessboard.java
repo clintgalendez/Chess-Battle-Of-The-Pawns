@@ -1,3 +1,5 @@
+// Graphical User Interface of the actual game
+
 package com.gui;
 
 import com.chessBOTP.Cells;
@@ -36,21 +38,21 @@ import java.awt.GraphicsEnvironment;
 public class Chessboard extends JFrame {
 
     //Class Variables
-    private JPanel chessBoard, mainPanel, boardPanel;
+    private JPanel mainPanel, boardPanel, 
+                   capturedBoardPanel1, capturedBoardPanel2;
     
-    private RoundedPanel  pieceCapturedP1, pieceCapturedP2, 
-                          namePanelP1, namePanelP2,
+    private RoundedPanel  namePanelP1, namePanelP2,
                           undoPanel, homePanel, settingsPanel;
 
     private JLayeredPane layeredPane;
 
     private JLabel player1Icon, player2Icon,
                    player1Name, player2Name,
-                   pCapturedP1, pCapturedP2;
+                   capturedBoardLabel1, capturedBoardLabel2;
 
     public final Cells cells[][] = new Cells[8][8];
-    private JButton pieceCapturedBoard1[][] = new JButton[4][4];
-    private JButton pieceCapturedBoard2[][] = new JButton[4][4];
+    private JButton capturedBoard1[][] = new JButton[4][4];
+    private JButton capturedBoard2[][] = new JButton[4][4];
     
     private Time clock;
 
@@ -68,7 +70,7 @@ public class Chessboard extends JFrame {
     }
 
     // Create the user interface of the actual game
-    private void GUI() {
+    public void GUI() {
         setTitle("Masterchess: The Battle of the Pawns");
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -80,6 +82,8 @@ public class Chessboard extends JFrame {
         int width = 1280;
         int height = 720;
         setBounds(center.x - width / 2, center.y - height / 2, width, height);
+
+        setVisible(true);
     }
 
     // Initialize the components
@@ -101,9 +105,7 @@ public class Chessboard extends JFrame {
         layeredPane = new JLayeredPane();
         layeredPane.setBounds(0, 0, 1280, 720);
 
-        /*
-         * The gamebg is background of the game
-         */
+        // The gamebg is background of the game
         JLabel gamebg = new JLabel(new ImageIcon(createImage("images/GameBackground.png", 1280,720)));
         gamebg.setBounds(0, 0, 1280, 720);
 
@@ -117,167 +119,61 @@ public class Chessboard extends JFrame {
         mainPanel.setOpaque(false);
         mainPanel.setSize(1280,720);
 
-        // Contain the chess gaming board
-        boardPanel = new JPanel(new GridBagLayout());
+        // The boardPanel is the 8x8 chessboard including the letters and numbers
+        boardPanel = createChessBoardPanel(cells, CALICO, ZEUS);
         boardPanel.setBounds(320,50,625,625);
-        boardPanel.setBackground(new Color(49,42,33));
-        boardPanel.setBorder(new LineBorder(CALICO, 2));
 
-        GridBagConstraints gbc = new GridBagConstraints();
-
-        JLabel topleft = new JLabel("");
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.5;
-        gbc.weighty = 0.5;
-        gbc.gridwidth = 2;
-        gbc.gridwidth = 2;
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        boardPanel.add(topleft, gbc);
-        
-        // Create the upper letters of the chessboard
-        createLetters(boardPanel, 0, false);
-
-        JLabel topright = new JLabel("");
-        gbc.fill = GridBagConstraints.BOTH;
-        gbc.weightx = 0.5;
-        gbc.weighty = 0.5;
-        gbc.gridwidth = 2;
-        gbc.gridwidth = 2;
-        gbc.gridx = 12;
-        gbc.gridy = 12;
-        boardPanel.add(topright, gbc);
-
-        // Create the left side numbers of the chessboard
-        createNumbers(boardPanel, 0, false);
-
-        JLabel bottomleft = new JLabel("");
-        gbc.weightx = 0.5;
-        gbc.weighty = 0.5;
-        gbc.gridwidth = 2;
-        gbc.gridheight = 2;
-        gbc.gridx = 0;
-        gbc.gridy = 11;
-        boardPanel.add(bottomleft, gbc);
-
-        // Initialize the cells of the chessboard
-        initChessBoardCells(cells, 8, true, CALICO, ZEUS,null);
-
-        /*
-         * Contains the cells of the chessboard alone
-         */
-        chessBoard = new JPanel(new GridLayout(0,8));
-        chessBoard.setBorder(new LineBorder(CALICO, 2));
-        chessBoard.setOpaque(false);
-        chessBoard.setPreferredSize(new Dimension(550,550));
- 
-        for (int i = 0; i < 8; i++) {
-            for (int j = 0; j < 8; j++) {   
-                chessBoard.add(cells[i][j]);
-            }
-        }
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        gbc.gridwidth = 10;
-        gbc.gridheight = 10;
-        boardPanel.add(chessBoard, gbc);
-
-        // Create the right side numbers of the chessboard
-        createNumbers(boardPanel, 12, true);
-
-        // Create the lower letters of the chessboard
-        createLetters(boardPanel, 12, true);
-
-        JLabel bottomright = new JLabel("");
-        gbc.fill = GridBagConstraints.REMAINDER;
-        boardPanel.add(bottomright, gbc);
-
-        /*
-         * The pieceCapturedP1 is the 8x8 board that will contain the pieces captured by player 1
-         */
-        pieceCapturedP1 = new RoundedPanel(new GridLayout(0,4),0);
-        pieceCapturedP1.setBounds(27,200,270,270);
-
-        initCapturedBoard(pieceCapturedBoard1, ZEUS, CALICO);
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0;j < 4; j++) {
-                pieceCapturedP1.add(pieceCapturedBoard1[i][j]);
-            }
-        }
+        // The pieceCapturedP1 is the 8x8 board that will contain the pieces captured by player 1
+        capturedBoardPanel1 = createCapturedBoardPanel(capturedBoard1, ZEUS, CALICO);
+        capturedBoardPanel1.setBounds(27,200,270,270);
 
         // Label for the piece captured board of player 1
-        pCapturedP1 = new JLabel("Pieces Captured");
-        pCapturedP1.setFont(new Font("Verdana",Font.PLAIN,15));
-        pCapturedP1.setForeground(CALICO);
-        pCapturedP1.setHorizontalAlignment(JTextField.CENTER);
-        pCapturedP1.setBounds(102,170,122,15);
+        capturedBoardLabel1 = createBoardLabel();
+        capturedBoardLabel1.setBounds(102,170,122,15);
 
-        /*
-         * The pieceCapturedP2 is the 8x8 board that will contain the pieces captured by player 2
-         */
-        pieceCapturedP2 = new RoundedPanel(new GridLayout(0,4),0);
-        pieceCapturedP2.setBounds(967,200,270,270);
-
-        initCapturedBoard(pieceCapturedBoard2, CALICO, ZEUS);
-
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 4; j++) {
-                pieceCapturedP2.add(pieceCapturedBoard2[i][j]);
-            }
-        }
+        // The pieceCapturedP2 is the 8x8 board that will contain the pieces captured by player 2
+        capturedBoardPanel2 = createCapturedBoardPanel(capturedBoard2, CALICO, ZEUS);
+        capturedBoardPanel2.setBounds(967,200,270,270);
 
         // Label of the piece captured board of player 2
-        pCapturedP2 = new JLabel("Pieces Captured");
-        pCapturedP2.setFont(new Font("Verdana",Font.PLAIN,15));
-        pCapturedP2.setForeground(CALICO);
-        pCapturedP2.setHorizontalAlignment(JTextField.CENTER);
-        pCapturedP2.setBounds(1041,170,122,15);
+        capturedBoardLabel2 = createBoardLabel();
+        capturedBoardLabel2.setBounds(1041,170,122,15);
 
+        // Icon for player 1
         player1Icon = new JLabel(new ImageIcon(createImage("images/Player1.png",65,65)));
         player1Icon.setBounds(6,3,90,90);
 
-        player1Name = new JLabel("Player 1");
-        player1Name.setFont(new Font("Verdana",Font.BOLD,15));
-        player1Name.setForeground(Color.BLACK);
-        player1Name.setHorizontalAlignment(JTextField.CENTER);
+        // Name of player 1
+        player1Name = createPlayerName(player1Name, "Player 1");
         player1Name.setBounds(78,3,196,90);
 
-        /*
-         * The namePanelP1 will consist the name and icon of player 1
-         */
-        namePanelP1 = new RoundedPanel(null,10);
-        namePanelP1.setBackground(CAMEO);
-        namePanelP1.setBounds(18,25,289,100);
+        // The namePanelP1 will consist the name and icon of player 1
+        namePanelP1 = createPlayerNamePanel(namePanelP1);
         namePanelP1.setBorder(new LineBorder(ZEUS, 2, true));
+        namePanelP1.setBounds(18,25,289,100);
         namePanelP1.add(player1Icon);
         namePanelP1.add(player1Name);
 
+        // Icon for player 2
         player2Icon = new JLabel(new ImageIcon(createImage("images/Player2.png",65,65)));
         player2Icon.setBounds(186,3,90,90);
 
-        player2Name = new JLabel("Player 2");
-        player2Name.setFont(new Font("Verdana",Font.BOLD,15));
-        player2Name.setForeground(Color.BLACK);
-        player2Name.setHorizontalAlignment(JTextField.CENTER);
+        // Name of player 2
+        player2Name = createPlayerName(player2Name, "Player 2");
         player2Name.setBounds(10,3,196,90);
 
-        /*
-         * The namePanelP1 will consist the name and icon of player 2
-         */
-        namePanelP2 = new RoundedPanel(null, 10);
-        namePanelP2.setBackground(CAMEO);
-        namePanelP2.setBounds(958,25,289,100);
+        // The namePanelP1 will consist the name and icon of player 2
+        namePanelP2 = createPlayerNamePanel(namePanelP2);
         namePanelP2.setBorder(new LineBorder(CALICO, 2, true));
+        namePanelP2.setBounds(958,25,289,100);
         namePanelP2.add(player2Icon);
         namePanelP2.add(player2Name);
 
-        /*
-         * The clock is the timer of the game
-         */
+        // The clock is the timer of the game
         clock = new Time();
         clock.setBounds(595,10,90,30);
 
+        // Contains the undo button
         undoPanel = new RoundedPanel(null, 10);
         undoPanel.setBackground(CAMEO);
         undoPanel.setBounds(18,600,60,60);
@@ -287,6 +183,7 @@ public class Chessboard extends JFrame {
 
         undoPanel.add(undobutton);
 
+        // Contains the home button
         homePanel = new RoundedPanel(null, 10);
         homePanel.setBackground(CAMEO);
         homePanel.setBounds(1184,600,60,60);
@@ -296,20 +193,21 @@ public class Chessboard extends JFrame {
 
         homePanel.add(homebutton);
 
+        // Contains the settings button
         settingsPanel = new RoundedPanel(null, 10);
         settingsPanel.setBackground(CAMEO);
         settingsPanel.setBounds(1184,530,60,60);
         
-        settingsbutton = new SettingsButton(clock, settingsPanel);
+        settingsbutton = new SettingsButton(clock, settingsPanel, mainPanel);
         settingsbutton.setBounds(0,0,60,60);
         
         settingsPanel.add(settingsbutton);
 
         mainPanel.add(boardPanel);
-        mainPanel.add(pieceCapturedP1);
-        mainPanel.add(pCapturedP1);
-        mainPanel.add(pieceCapturedP2);
-        mainPanel.add(pCapturedP2);
+        mainPanel.add(capturedBoardPanel1);
+        mainPanel.add(capturedBoardLabel1);
+        mainPanel.add(capturedBoardPanel2);
+        mainPanel.add(capturedBoardLabel2);
         mainPanel.add(namePanelP1);
         mainPanel.add(namePanelP2);
         mainPanel.add(clock);
@@ -323,52 +221,36 @@ public class Chessboard extends JFrame {
         clock.timer.start();
     }
 
-    // Method for initializing images
-    public Image createImage(String filename, int width, int height) {
-        Image background = null;
-        try {
-            InputStream in = Chessboard.class.getResourceAsStream(filename);
-            BufferedImage bi = ImageIO.read(in);
-            ImageIcon icon = new ImageIcon(bi);
-            background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);;
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.exit(1);
-        }
-
-        return background;
-    }
-
-    // Method for initializing chessboard cells
-    public void initChessBoardCells(Cells[][] board, int size, boolean isEnabled, Color color1, Color color2, Color color3) {
+    // Initialize chessboard cells
+    private void initChessBoardCells(Cells[][] cells, int dimension, boolean isEnabled, Color color1, Color color2, Color color3) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
 
-            for (int i = 0; i < size; i++) {
-                for (int j = 0; j < size; j++) {
-                    Cells b = new Cells(j, i, 0, 0,null);
-                    b.setMargin(buttonMargin);
-                    b.setEnabled(isEnabled);
-                    b.setFocusable(false);
-                    b.setBorder(new LineBorder(color3, 1, false));
-                    b.addActionListener(Main::buttonClickedHandler);
+            for (int i = 0; i < dimension; i++) {
+                for (int j = 0; j < dimension; j++) {
+                    Cells cell = new Cells(j, i, 0, 0,null);
+                    cell.setMargin(buttonMargin);
+                    cell.setEnabled(isEnabled);
+                    cell.setFocusable(false);
+                    cell.setBorder(new LineBorder(color3, 1, false));
+                    cell.addActionListener(Main::buttonClickedHandler);
                     
                     ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
                             BufferedImage.TYPE_INT_ARGB));
-                    b.setIcon(icon);
+                    cell.setIcon(icon);
 
                     if (((j % 2 == 1) && (i % 2 == 1))
                             || ((j % 2 == 0) && (i % 2 == 0))) {
-                        b.setBackground(color1);
+                        cell.setBackground(color1);
                     } else {
-                        b.setBackground(color2);
+                        cell.setBackground(color2);
                     }
-                    board[j][i] = b;
+                    cells[j][i] = cell;
                 }
             }
     }
 
-    // Method for creating the chessboard letters
-    private void createLetters(JPanel boardPanel, int row, boolean isReverse) {
+    // Create letters of the chessboard
+    private void createLetters(JPanel panel, int row, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
         String letters = "ABCDEFGH";
         String reverse = "";
@@ -391,12 +273,12 @@ public class Chessboard extends JFrame {
             gbc.gridy = row;
             gbc.weightx = 1;
             gbc.weighty = 1;
-            boardPanel.add(letter,gbc);
+            panel.add(letter,gbc);
         }
     }
 
-    // Method for creating the chessboard numbers
-    private void createNumbers(JPanel boardPanel, int column, boolean isReverse) {
+    // Create numbers of the chessboard
+    private void createNumbers(JPanel panel, int column, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
         int num;
         for (int i = 0; i < 8; i++) {
@@ -414,56 +296,193 @@ public class Chessboard extends JFrame {
             gbc.gridy = i+2;
             gbc.weightx = 1;
             gbc. weighty = 1;
-            boardPanel.add(number,gbc);
+            panel.add(number,gbc);
         }
     }
 
-    // Method for initializing captured board cells
-    public void initCapturedBoard(JButton[][] board, Color color1, Color color2) {
+    // Create the 8x8 chessboard with its numbers and letters
+    private JPanel createChessBoardPanel(Cells[][] cells, Color color1, Color color2) {
+        JPanel panel = new JPanel(new GridBagLayout());
+        panel.setBackground(new Color(49,42,33));
+        panel.setBorder(new LineBorder(color1, 2));
+
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        JLabel topleft = new JLabel("");
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.5;
+        gbc.weighty = 0.5;
+        gbc.gridwidth = 2;
+        gbc.gridwidth = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        panel.add(topleft, gbc);
+        
+        createLetters(panel, 0, true);
+
+        JLabel topright = new JLabel("");
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.weightx = 0.5;
+        gbc.weighty = 0.5;
+        gbc.gridwidth = 2;
+        gbc.gridwidth = 2;
+        gbc.gridx = 12;
+        gbc.gridy = 12;
+        panel.add(topright, gbc);
+
+        createNumbers(panel, 0, false);
+
+        JLabel bottomleft = new JLabel("");
+        gbc.weightx = 0.5;
+        gbc.weighty = 0.5;
+        gbc.gridwidth = 2;
+        gbc.gridheight = 2;
+        gbc.gridx = 0;
+        gbc.gridy = 11;
+        panel.add(bottomleft, gbc);
+
+        // Initialize the cells of the chessboard
+        initChessBoardCells(cells, 8, true, color1, color2, null);
+
+        JPanel board = new JPanel(new GridLayout(0,8));
+        board.setBorder(new LineBorder(color1, 2));
+        board.setOpaque(false);
+        board.setPreferredSize(new Dimension(550,550));
+ 
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {   
+                board.add(cells[i][j]);
+            }
+        }
+        gbc.gridx = 1;
+        gbc.gridy = 1;
+        gbc.gridwidth = 10;
+        gbc.gridheight = 10;
+        panel.add(board, gbc);
+
+        createNumbers(panel, 12, true);
+
+        createLetters(panel, 12, false);
+
+        JLabel bottomright = new JLabel("");
+        gbc.fill = GridBagConstraints.REMAINDER;
+        panel.add(bottomright, gbc);
+
+        return panel;
+    }
+
+    // Initialize captured board cells
+    private void initCapturedBoard(JButton[][] cells, Color color1, Color color2) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
 
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < 4; j++) {
-                    JButton b = new JButton();
-                    b.setMargin(buttonMargin);
-                    b.setEnabled(false);
-                    b.setFocusable(false);
-                    b.setBorder(new LineBorder(color1, 1, false));
+                    JButton cell = new JButton();
+                    cell.setMargin(buttonMargin);
+                    cell.setEnabled(false);
+                    cell.setFocusable(false);
+                    cell.setBorder(new LineBorder(color1, 1, false));
                     ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
                             BufferedImage.TYPE_INT_ARGB));
-                    b.setIcon(icon);
-                    b.setBackground(color2);
-                    board[i][j] = b;
+                    cell.setIcon(icon);
+                    cell.setBackground(color2);
+                    cells[j][i] = cell;
                 }
             }
     }
 
-    public void addToCapturedBoard(Cells chosenCell, int i, int j, int m, int n) {
+    // Create captured board
+    private JPanel createCapturedBoardPanel(JButton[][] cells, Color color1, Color color2) {
+        JPanel panel = new JPanel(new GridLayout(0,4));
+
+        initCapturedBoard(cells, color1, color2);
+
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0;j < 4; j++) {
+                panel.add(cells[i][j]);
+            }
+        }
+
+        return panel;
+    }
+
+    // Create captured board label
+    private JLabel createBoardLabel() {
+        JLabel label = new JLabel("Pieces Captured");
+        label.setFont(new Font("Verdana",Font.PLAIN,15));
+        label.setForeground(CALICO);
+        label.setHorizontalAlignment(JTextField.CENTER);
+
+        return label;
+    }
+
+    // Add piece to captured board
+    public void addToCapturedBoard(Cells chosenCell, int[] coordinates) {
+        int i = coordinates[0]; int j = coordinates[1];
+        int m = coordinates[2]; int n = coordinates[3];
         if(chosenCell.pieceColor == 1) {
-            pieceCapturedBoard1[i][j].setIcon(chosenCell.piece);
-            pieceCapturedBoard1[i][j].setDisabledIcon(chosenCell.piece);
+            capturedBoard1[i][j].setIcon(chosenCell.piece);
+            capturedBoard1[i][j].setDisabledIcon(chosenCell.piece);
         } else {
-            pieceCapturedBoard2[m][n].setIcon(chosenCell.piece);
-            pieceCapturedBoard2[m][n].setDisabledIcon(chosenCell.piece);
+            capturedBoard2[m][n].setIcon(chosenCell.piece);
+            capturedBoard2[m][n].setDisabledIcon(chosenCell.piece);
         }
     }
 
+    // Remove piece from captured bored
     public void removeFromCapturedBoard(Players player, int y, int x) {
         if(player.getPlayerColor() == 1) {
-            pieceCapturedBoard1[y][x].setIcon(null);
+            capturedBoard1[y][x].setIcon(null);
         } else {
-            pieceCapturedBoard2[y][x].setIcon(null);
+            capturedBoard2[y][x].setIcon(null);
         }
     }
 
+    // Create player name
+    private JLabel createPlayerName(JLabel label, String name) {
+        label = new JLabel(name);
+        label.setFont(new Font("Verdana",Font.BOLD,15));
+        label.setForeground(Color.BLACK);
+        label.setHorizontalAlignment(JTextField.CENTER);
+        
+        return label;
+    }
+
+    // Contain player name
+    private RoundedPanel createPlayerNamePanel(RoundedPanel panel) {
+        panel = new RoundedPanel(null,10);
+        panel.setBackground(CAMEO);
+        panel.setBorder(new LineBorder(ZEUS, 2, true));
+
+        return panel;
+    }
+
+    // Create images and icons for the game
+    public Image createImage(String filename, int width, int height) {
+            Image background = null;
+            try {
+                InputStream in = Chessboard.class.getResourceAsStream(filename);
+                BufferedImage bi = ImageIO.read(in);
+                ImageIcon icon = new ImageIcon(bi);
+                background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);;
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(1);
+            }
+
+            return background;
+    }
+
+    // Return a captured board
     public JButton[][] getCapturedBoard(Players player) {
         if (player.getPlayerColor() == -1) {
-            return pieceCapturedBoard1;
+            return capturedBoard1;
         } else {
-            return pieceCapturedBoard2;
+            return capturedBoard2;
         }
     }
 
+    // Return a name panel
     public RoundedPanel getNamePanel(Players player) {
         if (player.getPlayerColor() == -1) {
             return namePanelP1;
@@ -472,11 +491,13 @@ public class Chessboard extends JFrame {
         }
     }
 
-    public JComponent getLayeredpane() {
-        return layeredPane;
-    }
-
+    // Return chessboard cells
     public Cells[][] getCells() {
         return cells;
+    }
+
+    // Return the layered pane of the GUI
+    public JComponent getLayeredpane() {
+        return layeredPane;
     }
 }
