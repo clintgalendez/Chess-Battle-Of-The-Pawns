@@ -226,9 +226,9 @@ public class Main {
             for (int j = 0; j < 8; j++) {
                 if (((j % 2 == 1) && (i % 2 == 1))
                         || ((j % 2 == 0) && (i % 2 == 0))) {
-                    board[i][j].setBackground(new Color(224, 190, 145));
+                    board[j][i].setBackground(new Color(224, 190, 145));
                 } else {
-                    board[i][j].setBackground(new Color(47, 38, 29));
+                    board[j][i].setBackground(new Color(47, 38, 29));
                 }
             }
         }
