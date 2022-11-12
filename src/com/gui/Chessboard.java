@@ -35,28 +35,14 @@ import java.awt.GraphicsEnvironment;
 
 public class Chessboard extends JFrame {
 
-    //Class Variables
-    private JPanel chessBoard, mainPanel, boardPanel;
-    
-    private RoundedPanel  pieceCapturedP1, pieceCapturedP2, 
-                          namePanelP1, namePanelP2,
-                          undoPanel, homePanel, settingsPanel;
+    private RoundedPanel namePanelP1;
+    private RoundedPanel namePanelP2;
 
     private JLayeredPane layeredPane;
 
-    private JLabel player1Icon, player2Icon,
-                   player1Name, player2Name,
-                   pCapturedP1, pCapturedP2;
-
-    public final Cells cells[][] = new Cells[8][8];
-    private JButton pieceCapturedBoard1[][] = new JButton[4][4];
-    private JButton pieceCapturedBoard2[][] = new JButton[4][4];
-    
-    private Time clock;
-
-    private UndoButton undobutton;
-    private HomeButton homebutton;
-    private SettingsButton settingsbutton;
+    public final Cells[][] cells = new Cells[8][8];
+    private final JButton[][] pieceCapturedBoard1 = new JButton[4][4];
+    private final JButton[][] pieceCapturedBoard2 = new JButton[4][4];
 
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
@@ -113,12 +99,12 @@ public class Chessboard extends JFrame {
          *               namePanel1, namePanel2, clock,
          *               undobutton, settingsbutton, homebutton}
          */
-        mainPanel = new JPanel(null);
+        JPanel mainPanel = new JPanel(null);
         mainPanel.setOpaque(false);
         mainPanel.setSize(1280,720);
 
         // Contain the chess gaming board
-        boardPanel = new JPanel(new GridBagLayout());
+        JPanel boardPanel = new JPanel(new GridBagLayout());
         boardPanel.setBounds(320,50,625,625);
         boardPanel.setBackground(new Color(49,42,33));
         boardPanel.setBorder(new LineBorder(CALICO, 2));
@@ -129,7 +115,6 @@ public class Chessboard extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 0.5;
         gbc.weighty = 0.5;
-        gbc.gridwidth = 2;
         gbc.gridwidth = 2;
         gbc.gridx = 0;
         gbc.gridy = 0;
@@ -142,7 +127,6 @@ public class Chessboard extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 0.5;
         gbc.weighty = 0.5;
-        gbc.gridwidth = 2;
         gbc.gridwidth = 2;
         gbc.gridx = 12;
         gbc.gridy = 12;
@@ -166,14 +150,15 @@ public class Chessboard extends JFrame {
         /*
          * Contains the cells of the chessboard alone
          */
-        chessBoard = new JPanel(new GridLayout(0,8));
+        //Class Variables
+        JPanel chessBoard = new JPanel(new GridLayout(0, 8));
         chessBoard.setBorder(new LineBorder(CALICO, 2));
         chessBoard.setOpaque(false);
         chessBoard.setPreferredSize(new Dimension(550,550));
  
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {   
-                chessBoard.add(cells[i][j]);
+                chessBoard.add(cells[j][i]);
             }
         }
         gbc.gridx = 1;
@@ -195,7 +180,7 @@ public class Chessboard extends JFrame {
         /*
          * The pieceCapturedP1 is the 8x8 board that will contain the pieces captured by player 1
          */
-        pieceCapturedP1 = new RoundedPanel(new GridLayout(0,4),0);
+        RoundedPanel pieceCapturedP1 = new RoundedPanel(new GridLayout(0, 4), 0);
         pieceCapturedP1.setBounds(27,200,270,270);
 
         initCapturedBoard(pieceCapturedBoard1, ZEUS, CALICO);
@@ -207,7 +192,7 @@ public class Chessboard extends JFrame {
         }
 
         // Label for the piece captured board of player 1
-        pCapturedP1 = new JLabel("Pieces Captured");
+        JLabel pCapturedP1 = new JLabel("Pieces Captured");
         pCapturedP1.setFont(new Font("Verdana",Font.PLAIN,15));
         pCapturedP1.setForeground(CALICO);
         pCapturedP1.setHorizontalAlignment(JTextField.CENTER);
@@ -216,7 +201,7 @@ public class Chessboard extends JFrame {
         /*
          * The pieceCapturedP2 is the 8x8 board that will contain the pieces captured by player 2
          */
-        pieceCapturedP2 = new RoundedPanel(new GridLayout(0,4),0);
+        RoundedPanel pieceCapturedP2 = new RoundedPanel(new GridLayout(0, 4), 0);
         pieceCapturedP2.setBounds(967,200,270,270);
 
         initCapturedBoard(pieceCapturedBoard2, CALICO, ZEUS);
@@ -228,16 +213,16 @@ public class Chessboard extends JFrame {
         }
 
         // Label of the piece captured board of player 2
-        pCapturedP2 = new JLabel("Pieces Captured");
+        JLabel pCapturedP2 = new JLabel("Pieces Captured");
         pCapturedP2.setFont(new Font("Verdana",Font.PLAIN,15));
         pCapturedP2.setForeground(CALICO);
         pCapturedP2.setHorizontalAlignment(JTextField.CENTER);
         pCapturedP2.setBounds(1041,170,122,15);
 
-        player1Icon = new JLabel(new ImageIcon(createImage("images/Player1.png",65,65)));
+        JLabel player1Icon = new JLabel(new ImageIcon(createImage("images/Player1.png", 65, 65)));
         player1Icon.setBounds(6,3,90,90);
 
-        player1Name = new JLabel("Player 1");
+        JLabel player1Name = new JLabel("Player 1");
         player1Name.setFont(new Font("Verdana",Font.BOLD,15));
         player1Name.setForeground(Color.BLACK);
         player1Name.setHorizontalAlignment(JTextField.CENTER);
@@ -253,10 +238,10 @@ public class Chessboard extends JFrame {
         namePanelP1.add(player1Icon);
         namePanelP1.add(player1Name);
 
-        player2Icon = new JLabel(new ImageIcon(createImage("images/Player2.png",65,65)));
+        JLabel player2Icon = new JLabel(new ImageIcon(createImage("images/Player2.png", 65, 65)));
         player2Icon.setBounds(186,3,90,90);
 
-        player2Name = new JLabel("Player 2");
+        JLabel player2Name = new JLabel("Player 2");
         player2Name.setFont(new Font("Verdana",Font.BOLD,15));
         player2Name.setForeground(Color.BLACK);
         player2Name.setHorizontalAlignment(JTextField.CENTER);
@@ -275,32 +260,32 @@ public class Chessboard extends JFrame {
         /*
          * The clock is the timer of the game
          */
-        clock = new Time();
+        Time clock = new Time();
         clock.setBounds(595,10,90,30);
 
-        undoPanel = new RoundedPanel(null, 10);
+        RoundedPanel undoPanel = new RoundedPanel(null, 10);
         undoPanel.setBackground(CAMEO);
         undoPanel.setBounds(18,600,60,60);
 
-        undobutton = new UndoButton(undoPanel);
+        UndoButton undobutton = new UndoButton(undoPanel);
         undobutton.setBounds(0,0,60,60);
 
         undoPanel.add(undobutton);
 
-        homePanel = new RoundedPanel(null, 10);
+        RoundedPanel homePanel = new RoundedPanel(null, 10);
         homePanel.setBackground(CAMEO);
         homePanel.setBounds(1184,600,60,60);
-        
-        homebutton = new HomeButton(homePanel);
+
+        HomeButton homebutton = new HomeButton(homePanel);
         homebutton.setBounds(0,0,60,60);
 
         homePanel.add(homebutton);
 
-        settingsPanel = new RoundedPanel(null, 10);
+        RoundedPanel settingsPanel = new RoundedPanel(null, 10);
         settingsPanel.setBackground(CAMEO);
         settingsPanel.setBounds(1184,530,60,60);
-        
-        settingsbutton = new SettingsButton(clock, settingsPanel);
+
+        SettingsButton settingsbutton = new SettingsButton(clock, settingsPanel);
         settingsbutton.setBounds(0,0,60,60);
         
         settingsPanel.add(settingsbutton);
@@ -328,9 +313,10 @@ public class Chessboard extends JFrame {
         Image background = null;
         try {
             InputStream in = Chessboard.class.getResourceAsStream(filename);
+            assert in != null;
             BufferedImage bi = ImageIO.read(in);
             ImageIcon icon = new ImageIcon(bi);
-            background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);;
+            background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -371,14 +357,14 @@ public class Chessboard extends JFrame {
     private void createLetters(JPanel boardPanel, int row, boolean isReverse) {
         GridBagConstraints gbc = new GridBagConstraints();
         String letters = "ABCDEFGH";
-        String reverse = "";
+        StringBuilder reverse = new StringBuilder();
         if(isReverse) {
             for(int i = 0; i<letters.length(); i++) {
                 char ch = letters.charAt(i);
-                reverse = ch + reverse;
+                reverse.insert(0, ch);
             }
         } else {
-            reverse = letters;
+            reverse = new StringBuilder(letters);
         }
         
         for (int i = 0; i < 8; i++) {

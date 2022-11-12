@@ -9,18 +9,12 @@ import java.awt.GraphicsEnvironment;
 
 public class Masterchess extends JFrame {
     public static void main(String[] args) {
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-                new Masterchess();
-            }
-        };
+        Runnable r = Masterchess::new;
         SwingUtilities.invokeLater(r);
     }
 
     public Masterchess() {
-        chessBoardLayout gui = new chessBoardLayout();
+        Chessboard gui = new Chessboard();
 
         setTitle("Masterchess: The Battle of the Pawns");
 

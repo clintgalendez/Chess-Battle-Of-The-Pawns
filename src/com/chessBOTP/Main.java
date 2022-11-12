@@ -90,11 +90,7 @@ public class Main {
             turnHandler.getCurrentPlayer().addMove(cell);
 
             //**Move the Piece**//
-            chosenCell.CONTAINS = prevChosenCell.CONTAINS; //The previous cell will now move to the new cell
-            chosenCell.pieceColor = prevChosenCell.pieceColor; //The newly clicked cell will contain the color of the previous cell
-            chosenCell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
-            chosenCell.piece = chosenCell.getIcon();
-            turnHandler.getCurrentPlayer().addMove(chosenCell); //Add the move to the current player's moves
+            turnHandler.getCurrentPlayer().addMove(changeCellProperties(chosenCell)); //Add the move to the current player's moves
 
             //**Reset The previous Cell**//
             prevChosenCell.CONTAINS = 0;
@@ -115,9 +111,22 @@ public class Main {
         }
     }
 
+    public static Cells changeCellProperties(Cells cell) {
+        if (prevChosenCell.CONTAINS == 5) {
+            cell.CONTAINS = 3;
+        } else {
+            cell.CONTAINS = prevChosenCell.CONTAINS; //The newly clicked cell will contain the color of the previous cell
+        }
+        cell.pieceColor = prevChosenCell.pieceColor; //The previous cell will now move to the new cell
+        cell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+        cell.piece = cell.getIcon();
+
+        return cell;
+    }
+
     public static Cells calculateFutureMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
-        int x = chosenCell.posX + (currentColorPiece * moves[i][1]);
-        int y = chosenCell.posY + moves[i][0];
+        int x = chosenCell.posX + moves[i][0];
+        int y = chosenCell.posY + (currentColorPiece * moves[i][1]);
         if (x >= 0 && x < 8 && y >= 0 && y < 8 && chessboard.getCells()[x][y].pieceColor != currentColorPiece) {
             return chessboard.getCells()[x][y];
         }
@@ -163,11 +172,20 @@ public class Main {
             }
 
         } else {
+            piece = specialPieceHandler(chosenCell);
             for (int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
                 int[][] moves = MoveSets.getAvailableMoves(piece);
 
                 futureCells = calculateFutureMove(chosenCell, currentColorPiece, i, moves);
                 if (futureCells == null) {
+                    continue;
+                }
+
+                if (piece == 5 && futureCells.CONTAINS != 0) {
+                    break;
+                }
+
+                if (piece == 4 && futureCells.CONTAINS == 0) {
                     continue;
                 }
 
@@ -177,6 +195,30 @@ public class Main {
 
         prevChosenCell = chosenCell;
         allowedToMove = true;
+    }
+
+    public static int specialPieceHandler(Cells chosenCell) {
+        int enemyPresent = 0;
+        if (chosenCell.CONTAINS == 3 || chosenCell.CONTAINS == 5) {
+            //check surrounding of the cell
+            if (chosenCell.posX - 1 >= 0 && chosenCell.posY + (chosenCell.pieceColor) >= 0) {
+                if (chessboard.getCells()[chosenCell.posX - 1][chosenCell.posY + (chosenCell.pieceColor)].pieceColor == -chosenCell.pieceColor) {
+                    enemyPresent++;
+                }
+            }
+
+            if (chosenCell.posX + 1 < 8 && chosenCell.posY + (chosenCell.pieceColor) >= 0) {
+                if (chessboard.getCells()[chosenCell.posX + 1][chosenCell.posY + (chosenCell.pieceColor)].pieceColor == -chosenCell.pieceColor) {
+                    enemyPresent++;
+                }
+            }
+        }
+
+        if (enemyPresent > 0) {
+            return 4;
+        }
+
+        return chosenCell.CONTAINS;
     }
 
     public static void resetColAvailCells(Cells[][] board) {
@@ -248,25 +290,25 @@ public class Main {
 
     public static void arrangeBoard() {
         //arrange the board
-        for (int x = 0; x < 8; x++) {
-            for (int y = 0; y < 8; y++) {
-                if (x == 0) {
-                    if (y == 0 || y == 7) {
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                if (y == 0) {
+                    if (x == 0 || x == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackRook.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 1 || y == 6) {
+                    } else if (x == 1 || x == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKnight.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 2 || y == 5) {
+                    } else if (x == 2 || x == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackBishop.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 3) {
+                    } else if (x == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
@@ -277,33 +319,33 @@ public class Main {
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     }
-                } else if (x == 1) {
+                } else if (y == 1) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackPawn.png",55,55)));
                     chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = 1;
-                } else if (x == 6) {
+                } else if (y == 6) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhitePawn.png",55,55)));
                     chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = -1;
-                } else if (x == 7) {
-                    if (y == 0 || y == 7) {
+                } else if (y == 7) {
+                    if (x == 0 || x == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteRook.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 1 || y == 6) {
+                    } else if (x == 1 || x == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKnight.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 2 || y == 5) {
+                    } else if (x == 2 || x == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteBishop.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 3) {
+                    } else if (x == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
