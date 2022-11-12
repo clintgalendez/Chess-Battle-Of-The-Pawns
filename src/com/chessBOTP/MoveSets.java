@@ -22,6 +22,9 @@ public class MoveSets {
     private static final int[][] PAWN_ATTACK_START = {
         {-1, 1}, {1, 1}, {0, 2}
     };
+    private static final int[][] PAWN_ATTACK_STARTED = {
+        {-1, 1}, {1, 1}, {0, 1}
+    };
     private static final int[][] BISHOP = {
         {-1, -1}, {-1, 1}, {1, -1}, {1, 1}
     };
@@ -50,6 +53,7 @@ public class MoveSets {
             case 7 -> BISHOP;
             case 8 -> ROOK;
             case 9 -> QUEEN;
+            case 10 -> PAWN_ATTACK_STARTED;
             default -> null;
         };
     }

@@ -149,13 +149,28 @@ public class Main {
     }
 
     public static Cells changeCellProperties(Cells cell) {
-        if (prevChosenCell.CONTAINS == 5) {
+        if(prevChosenCell.CONTAINS == 5) {
             cell.CONTAINS = 3;
+            cell.setIcon(prevChosenCell.getIcon());
+        } else if(prevChosenCell.CONTAINS == 3) {
+            if(cell.posY == 0) {
+                cell.CONTAINS = 9;
+                cell.setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
+            } else if(cell.posY == 7) {
+                cell.CONTAINS = 9;
+                cell.setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
+            } else {
+                cell.CONTAINS = prevChosenCell.CONTAINS;
+                cell.setIcon(prevChosenCell.getIcon());
+            }
         } else {
             cell.CONTAINS = prevChosenCell.CONTAINS; //The newly clicked cell will contain the color of the previous cell
+            cell.CONTAINS = prevChosenCell.CONTAINS;
+            cell.setIcon(prevChosenCell.getIcon());
         }
         cell.pieceColor = prevChosenCell.pieceColor; //The previous cell will now move to the new cell
         cell.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+        cell.pieceColor = prevChosenCell.pieceColor;
         cell.piece = cell.getIcon();
 
         return cell;
@@ -170,7 +185,6 @@ public class Main {
                     enemyPresent++;
                 }
             }
-
             if (chosenCell.posX + 1 < 8 && chosenCell.posY + (chosenCell.pieceColor) >= 0) {
                 if (chessboard.getCells()[chosenCell.posX + 1][chosenCell.posY + (chosenCell.pieceColor)].pieceColor == -chosenCell.pieceColor) {
                     enemyPresent++;
@@ -179,7 +193,11 @@ public class Main {
         }
 
         if (enemyPresent > 0) {
-            return 4;
+            if (chosenCell.CONTAINS == 3) {
+                return 10;
+            } else if (chosenCell.CONTAINS == 5) {
+                return 6;
+            }
         }
 
         return chosenCell.CONTAINS;
@@ -261,7 +279,7 @@ public class Main {
                     break;
                 }
 
-                if(piece == 4 && futureCells.CONTAINS == 0) {
+                if((piece == 10 || piece == 6) && futureCells.CONTAINS == 0 && i != MoveSets.getAvailableMoves(piece).length - 1) {
                     continue;
                 }
 
