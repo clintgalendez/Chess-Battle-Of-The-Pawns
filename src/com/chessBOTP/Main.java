@@ -193,9 +193,10 @@ public class Main {
                     continue;
                 }
 
-                if (piece == 5 && futureCells.CONTAINS != 0) {
+                if ((piece == 5 || piece ==3) && futureCells.CONTAINS != 0) {
                     break;
                 }
+
 
                 if ((piece == 10 || piece == 6) && futureCells.CONTAINS == 0 && i != MoveSets.getAvailableMoves(piece).length - 1) {
                     continue;
