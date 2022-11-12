@@ -275,7 +275,7 @@ public class Main {
                     continue;
                 }
 
-                if(piece == 5 && futureCells.CONTAINS != 0) {
+                if((piece == 5 || piece == 3) && futureCells.CONTAINS != 0) {
                     break;
                 }
 
