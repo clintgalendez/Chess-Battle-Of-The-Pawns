@@ -149,7 +149,10 @@ public class Main {
     }
 
     public static Cells changeCellProperties(Cells selectedMove) {
-        if(prevChosenCell.CONTAINS == 5) selectedMove.CONTAINS = 3;
+        if(prevChosenCell.CONTAINS == 5) {
+            selectedMove.CONTAINS = 3;
+            selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+        }
         else if(prevChosenCell.CONTAINS == 3) {
             if(selectedMove.posY == 0) {
                 selectedMove.CONTAINS = 9;
@@ -157,10 +160,14 @@ public class Main {
             } else if(selectedMove.posY == 7) {
                 selectedMove.CONTAINS = 9;
                 selectedMove.setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
-            } else selectedMove.CONTAINS = prevChosenCell.CONTAINS;    
-        } else selectedMove.CONTAINS = prevChosenCell.CONTAINS; //The newly clicked cell will contain the color of the previous cell
-    
-        selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            } else {
+                selectedMove.CONTAINS = prevChosenCell.CONTAINS; 
+                selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            }   
+        } else { 
+            selectedMove.CONTAINS = prevChosenCell.CONTAINS; //The newly clicked cell will contain the color of the previous cell
+            selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+        }
         selectedMove.pieceColor = prevChosenCell.pieceColor;
         selectedMove.piece = selectedMove.getIcon();
 
