@@ -22,6 +22,8 @@ public class Main {
     static boolean allowedToMove = false;
     static boolean isCheck = false;
     static boolean isSuggesting = false;
+    static boolean WKFirstMove = true;
+    static boolean BKFirstMove = true;
 
     static Cells prevChosenCell;
 
@@ -60,12 +62,12 @@ public class Main {
     public static void buttonClickedHandler(ActionEvent e) {
         Cells chosenCell = (Cells) e.getSource();
 
-        if (!gameStarted) {
+        if(!gameStarted) {
             return;
         }
 
-        if (prevChosenCell == chosenCell) {
-            resetColAvailCells(chessboard.getCells());
+        if(prevChosenCell == chosenCell) {
+            resetAvailCells(chessboard.getCells());
             prevChosenCell = null;
             allowedToMove = false;
             isSuggesting = false;
@@ -73,36 +75,43 @@ public class Main {
         }
 
         // Check if the cell is now available to choose among the available cells
-        if (allowedToMove) {
+        if(allowedToMove) {
             isCheck = false;
             /*
              * get the color of the cell that is clicked and check if it is green
              * for green means that it is available to be moved to.
              */
             Color color = chosenCell.getBackground();
-            if (color != Color.GREEN) return;
+            if(color != Color.GREEN) return;
 
             /*
              * get the icon of the cell that is clicked and check if it is a piece
              * for it means that it will be added to current player's captured board
              */
-            if (chosenCell.getIcon() != null) {
+            if(chosenCell.getIcon() != null) {
                 chessboard.addToCapturedBoard(chosenCell, coordinates);
 
-                if (chosenCell.pieceColor == 1) {
+                if(chosenCell.pieceColor == 1) {
                     coordinates[1]++;
-                    if (coordinates[1] > 3) {
+                    if(coordinates[1] > 3) {
                         coordinates[0]++;
                         coordinates[1] = 0;
                     } 
                 } else if(chosenCell.pieceColor == -1) {
                     coordinates[3]++;
-                    if (coordinates[3] > 3) {
+                    if(coordinates[3] > 3) {
                         coordinates[2]++;
                         coordinates[3] = 0;
                     }
                 }
             }
+
+            if(prevChosenCell.CONTAINS == 2)
+                if(checkedPiece == -1) {
+                    WKFirstMove = false;
+                } else {
+                    BKFirstMove = false;
+                }
 
             // Store chosen cell piece properties for undo purposes
             Cells cell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
@@ -132,103 +141,79 @@ public class Main {
             check();
 
             allowedToMove = false;
-            resetColAvailCells(chessboard.getCells());
+            resetAvailCells(chessboard.getCells());
             return;
         }
 
-        if (turnHandler.getCurrentPlayer().getPlayerColor() == chosenCell.pieceColor) {
+        if(turnHandler.getCurrentPlayer().getPlayerColor() == chosenCell.pieceColor) {
             chosenCell.setBackground(Color.YELLOW);
             isSuggesting = true;
-            setColAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor(), isSuggesting);
+            suggestAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor(), isSuggesting);
             prevChosenCell = chosenCell;
             allowedToMove = true;
         }
     }
 
-    public static Cells calculateFutureMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
+    public static Cells calculateCurrentMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
         int x = chosenCell.posX + (currentColorPiece * moves[i][1]);
         int y = chosenCell.posY + moves[i][0];
-        if (x >= 0 && x < 8 && y >= 0 && y < 8 && chessboard.getCells()[x][y].pieceColor != currentColorPiece) {
+        if(x >= 0 && x < 8 && y >= 0 && y < 8 && chessboard.getCells()[x][y].pieceColor != currentColorPiece) {
             return chessboard.getCells()[x][y];
         }
 
         return null;
     }
 
-    public static void setColAvailCells(Cells chosenCell, int currentColorPiece, boolean isSuggesting) {
+    public static void suggestAvailCells(Cells chosenCell, int currentColorPiece, boolean isSuggesting) {
         int piece = chosenCell.CONTAINS;
         Cells futureCells;
 
-        if (currentColorPiece == 0) {
+        if(currentColorPiece == 0) {
             return;
         }
 
-        if (chosenCell.CONTAINS == 7 || chosenCell.CONTAINS == 8 || chosenCell.CONTAINS == 9) {
-            for (int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
-                int[][] moves = MoveSets.getAvailableMoves(piece);
+        for (int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
+            int[][] moves = MoveSets.getAvailableMoves(piece);
 
-                futureCells = calculateFutureMove(chosenCell, currentColorPiece, i, moves);
-                if (futureCells == null) {
-                    continue;
+            futureCells = calculateCurrentMove(chosenCell, currentColorPiece, i, moves);
+            if(futureCells == null) {
+                continue;
+            }
+
+            if(!isSuggesting) {
+                if(futureCells.CONTAINS == 2) {
+                    checkedPiece = futureCells.pieceColor;
+                    isCheck = true;
+                    break;
                 }
+            } else {
+                futureCells.setBackground(Color.GREEN);
+            }
 
-                if(isSuggesting) {
-                    futureCells.setBackground(Color.GREEN);
-                } else {
-                    if(futureCells.CONTAINS == 2) {
-                        checkedPiece = futureCells.pieceColor;
-                        isCheck = true;
-                        return;
-                    }
-                }
+            if(futureCells.CONTAINS != 0) {
+                continue;
+            }
 
-                if (futureCells.CONTAINS != 0) {
-                    continue;
-                }
-
+            if(chosenCell.CONTAINS == 7 || chosenCell.CONTAINS == 8 || chosenCell.CONTAINS == 9) {
                 while (true) {
-                    futureCells = calculateFutureMove(futureCells, currentColorPiece, i, moves);
-                    if (futureCells == null) {
+                    futureCells = calculateCurrentMove(futureCells, currentColorPiece, i, moves);
+                    if(futureCells == null) {
                         break;
                     }
 
-                    if(isSuggesting) {
-                        futureCells.setBackground(Color.GREEN);
-                    } else {
+                    if(!isSuggesting) {
                         if(futureCells.CONTAINS == 2) {
                             checkedPiece = futureCells.pieceColor;
                             isCheck = true;
-                            return;
+                            break;
                         }
+                    } else {
+                        futureCells.setBackground(Color.GREEN);
                     }
 
-                    if (futureCells.CONTAINS != 0) {
+                    if(futureCells.CONTAINS != 0) {
                         break;
                     }
-                }
-            }
-
-        } else {
-            for (int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
-                int[][] moves = MoveSets.getAvailableMoves(piece);
-
-                futureCells = calculateFutureMove(chosenCell, currentColorPiece, i, moves);
-                if (futureCells == null) {
-                    continue;
-                }
-
-                if(isSuggesting) {
-                    futureCells.setBackground(Color.GREEN);
-                } else {
-                    if(futureCells.CONTAINS == 2) {
-                        checkedPiece = futureCells.pieceColor;
-                        isCheck = true;
-                        return;
-                    }
-                }
-
-                if (futureCells.CONTAINS != 0) {
-                    continue;
                 }
             }
         }
@@ -237,15 +222,15 @@ public class Main {
     public static void calculateFutureMove(Cells[][] board, boolean isSuggesting) {
         for(Cells[] cells : board) {
             for(Cells cell : cells ) {
-                setColAvailCells(cell, cell.pieceColor, isSuggesting);
+                suggestAvailCells(cell, cell.pieceColor, isSuggesting);
             }
         }
     }
 
-    public static void resetColAvailCells(Cells[][] board) {
+    public static void resetAvailCells(Cells[][] board) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
-                if (((j % 2 == 1) && (i % 2 == 1))
+                if(((j % 2 == 1) && (i % 2 == 1))
                         || ((j % 2 == 0) && (i % 2 == 0))) {
                     board[i][j].setBackground(new Color(224, 190, 145));
                 } else {
@@ -260,25 +245,36 @@ public class Main {
             chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.GREEN);
             chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
         } else {
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW);
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
+
             if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) {
                 undo();
             }
 
-            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW);
-            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
+            if(checkedPiece == -1) {
+                WKFirstMove = false;
+            } else {
+                BKFirstMove = false;
+            }
+        }
+    }
+
+    public static void checkMate() {
+        if(!WKFirstMove) {
+            
         }
     }
 
     public static void undo() {
-        if (turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
+        if(turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
             return;
         
         isCheck = false;
 
-        resetColAvailCells(chessboard.getCells());
+        resetAvailCells(chessboard.getCells());
         prevChosenCell = null;
         allowedToMove = false;
-        isSuggesting = false;
 
         turnHandler.nextTurn();
         Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
@@ -298,11 +294,11 @@ public class Main {
         currentCell.pieceColor = chosenCell.pieceColor;
 
         
-        if (currentCell.getIcon() != null) {
+        if(currentCell.getIcon() != null) {
             int y, x;
             if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
                 coordinates[1]--;
-                if (coordinates[1] < 0) {
+                if(coordinates[1] < 0) {
                     coordinates[0]--;
                     coordinates[1] = 3;
                 }
@@ -311,7 +307,7 @@ public class Main {
                 
             } else {
                 coordinates[3]--;
-                if (coordinates[3] < 0) {
+                if(coordinates[3] < 0) {
                     coordinates[2]--;
                     coordinates[3] = 3;
                 } 
@@ -324,7 +320,7 @@ public class Main {
 
             
         } 
-        
+        isSuggesting = false;
         calculateFutureMove(chessboard.getCells(), isSuggesting);
         check();
     }
@@ -333,23 +329,23 @@ public class Main {
         //arrange the board
         for (int x = 0; x < 8; x++) {
             for (int y = 0; y < 8; y++) {
-                if (x == 0) {
-                    if (y == 0 || y == 7) {
+                if(x == 0) {
+                    if(y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackRook.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 1 || y == 6) {
+                    } else if(y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackKnight.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 2 || y == 5) {
+                    } else if(y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackBishop.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
-                    } else if (y == 3) {
+                    } else if(y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
@@ -360,33 +356,33 @@ public class Main {
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = 1;
                     }
-                } else if (x == 1) {
+                } else if(x == 1) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/BlackPawn.png",55,55)));
                     chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = 1;
-                } else if (x == 6) {
+                } else if(x == 6) {
                     chessboard.getCells()[x][y].CONTAINS = 5;
                     chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhitePawn.png",55,55)));
                     chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                     chessboard.getCells()[x][y].pieceColor = -1;
-                } else if (x == 7) {
-                    if (y == 0 || y == 7) {
+                } else if(x == 7) {
+                    if(y == 0 || y == 7) {
                         chessboard.getCells()[x][y].CONTAINS = 8;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteRook.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 1 || y == 6) {
+                    } else if(y == 1 || y == 6) {
                         chessboard.getCells()[x][y].CONTAINS = 1;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteKnight.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 2 || y == 5) {
+                    } else if(y == 2 || y == 5) {
                         chessboard.getCells()[x][y].CONTAINS = 7;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteBishop.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
                         chessboard.getCells()[x][y].pieceColor = -1;
-                    } else if (y == 3) {
+                    } else if(y == 3) {
                         chessboard.getCells()[x][y].CONTAINS = 9;
                         chessboard.getCells()[x][y].setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
                         chessboard.getCells()[x][y].piece = chessboard.getCells()[x][y].getIcon();
