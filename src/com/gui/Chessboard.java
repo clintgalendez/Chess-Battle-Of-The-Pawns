@@ -7,6 +7,7 @@ import com.chessBOTP.Main;
 import com.chessBOTP.Players;
 
 import javax.imageio.ImageIO;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -47,11 +48,17 @@ public class Chessboard extends JFrame {
     private JButton capturedBoard1[][] = new JButton[4][4];
     private JButton capturedBoard2[][] = new JButton[4][4];
 
+    private Action action;
+    private Main main;
+
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
     private static final Color CAMEO = new Color(214, 188, 153);
 
-    public Chessboard() {
+    public Chessboard(Action action, Main main) {
+        this.action = action;
+        this.main = main;
+
         initialize();
         GUI();
     }
@@ -165,7 +172,7 @@ public class Chessboard extends JFrame {
         undoPanel.setBackground(CAMEO);
         undoPanel.setBounds(18,600,60,60);
 
-        UndoButton undobutton = new UndoButton(undoPanel);
+        UndoButton undobutton = new UndoButton(undoPanel, main);
         undobutton.setBounds(0,0,60,60);
 
         undoPanel.add(undobutton);
@@ -212,28 +219,28 @@ public class Chessboard extends JFrame {
     private void initChessBoardCells(Cells[][] cells, int dimension, boolean isEnabled, Color color1, Color color2, Color color3) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
 
-            for (int i = 0; i < dimension; i++) {
-                for (int j = 0; j < dimension; j++) {
-                    Cells cell = new Cells(j, i, 0, 0,null);
-                    cell.setMargin(buttonMargin);
-                    cell.setEnabled(isEnabled);
-                    cell.setFocusable(false);
-                    cell.setBorder(new LineBorder(color3, 1, false));
-                    cell.addActionListener(Main::buttonClickedHandler);
-                    
-                    ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
-                            BufferedImage.TYPE_INT_ARGB));
-                    cell.setIcon(icon);
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+                Cells cell = new Cells(j, i, 0, 0,null);
+                cell.setMargin(buttonMargin);
+                cell.setEnabled(isEnabled);
+                cell.setFocusable(false);
+                cell.setBorder(new LineBorder(color3, 1, false));
+                cell.addActionListener(action);
+                
+                ImageIcon icon = new ImageIcon(new BufferedImage(64, 64,
+                        BufferedImage.TYPE_INT_ARGB));
+                cell.setIcon(icon);
 
-                    if (((j % 2 == 1) && (i % 2 == 1))
-                            || ((j % 2 == 0) && (i % 2 == 0))) {
-                        cell.setBackground(color1);
-                    } else {
-                        cell.setBackground(color2);
-                    }
-                    cells[j][i] = cell;
+                if (((j % 2 == 1) && (i % 2 == 1))
+                        || ((j % 2 == 0) && (i % 2 == 0))) {
+                    cell.setBackground(color1);
+                } else {
+                    cell.setBackground(color2);
                 }
+                cells[j][i] = cell;
             }
+        }
     }
 
     // Create letters of the chessboard
@@ -446,19 +453,19 @@ public class Chessboard extends JFrame {
 
     // Create images and icons for the game
     public Image createImage(String filename, int width, int height) {
-            Image background = null;
-            try {
-                InputStream in = Chessboard.class.getResourceAsStream(filename);
-                assert in != null;
-                BufferedImage bi = ImageIO.read(in);
-                ImageIcon icon = new ImageIcon(bi);
-                background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);
-            } catch (Exception e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+        Image background = null;
+        try {
+            InputStream in = Chessboard.class.getResourceAsStream(filename);
+            assert in != null;
+            BufferedImage bi = ImageIO.read(in);
+            ImageIcon icon = new ImageIcon(bi);
+            background = icon.getImage().getScaledInstance(width, height,Image.SCALE_SMOOTH);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
 
-            return background;
+        return background;
     }
 
     // Return a captured board

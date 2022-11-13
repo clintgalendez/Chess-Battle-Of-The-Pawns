@@ -25,17 +25,19 @@ public class UndoButton extends JLabel implements MouseListener {
 
     Stack<Cells> undo = new Stack<Cells>();
     JPanel panel;
+    Main main;
 
-    UndoButton(JPanel panel) {
+    UndoButton(JPanel panel, Main main) {
         setIcon(new ImageIcon(createImage("images/Undo.png", 60, 60)));
         addMouseListener(this);
         this.panel = panel;
+        this.main = main;
     }
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Icon icon = Main.undo();
-        Main.undoCapturedBoard(icon);
+        Icon icon = main.undo();
+        main.undoCapturedBoard(icon);
     }
 
     @Override
