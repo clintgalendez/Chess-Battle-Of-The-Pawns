@@ -1,3 +1,5 @@
+// Turn-based handler of the game
+
 package com.chessBOTP;
 
 import java.awt.Color;
@@ -10,10 +12,6 @@ public class TurnBasedHandler {
     private Chessboard chessboard;
 
     public TurnBasedHandler(Players player1, Players player2, Chessboard board) {
-        firstTurn(player1, player2, board);
-    }
-
-    public void firstTurn(Players player1, Players player2, Chessboard board) {
         currentPlayer = player1;
         nextPlayer = player2;
         chessboard = board;
@@ -25,9 +23,6 @@ public class TurnBasedHandler {
         Players temp = currentPlayer;
         currentPlayer = nextPlayer;
         nextPlayer = temp;
-
-        chessboard.getNamePanel(currentPlayer).setBackground(Color.GREEN);
-        chessboard.getNamePanel(nextPlayer).setBackground(new Color(214, 188, 153));
     }
 
     public Players getCurrentPlayer() {
