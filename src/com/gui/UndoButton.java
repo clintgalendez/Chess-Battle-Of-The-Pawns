@@ -7,6 +7,7 @@ import java.awt.event.MouseListener;
 import java.io.InputStream;
 
 import javax.imageio.ImageIO;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -33,7 +34,8 @@ public class UndoButton extends JLabel implements MouseListener {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Main.undo();
+        Icon icon = Main.undo();
+        Main.undoCapturedBoard(icon);
     }
 
     @Override
