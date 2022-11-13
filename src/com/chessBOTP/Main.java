@@ -342,8 +342,7 @@ public class Main {
 
             // If a king is checked and another move made makes a king still checked
             if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) {
-                Icon icon = undo(); // Undo, as if a move is not made
-                undoCapturedBoard(icon);
+                undo(); // Undo, as if a move is not made
             }
         }
     }
