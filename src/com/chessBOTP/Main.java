@@ -130,7 +130,7 @@ public class Main {
             isSuggesting = false;
             calculateFutureMove(chessboard.getCells(), isSuggesting);
 
-            turnHandler.nextTurn(); //Change the turn to the next player
+            turnHandler.nextTurn(); // Change the turn to the next player
             check(); // Check if the move makes a check
 
             allowedToMove = false;
@@ -149,27 +149,27 @@ public class Main {
     }
 
     public static Cells changeCellProperties(Cells selectedMove) {
-        if(prevChosenCell.CONTAINS == 5) {
-            selectedMove.CONTAINS = 3;
-            selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+        if(prevChosenCell.CONTAINS == 5) { // If a selected piece to move is a pawn at start having two moves forward
+            selectedMove.CONTAINS = 3; // Then change it to pawn at play having one move forward only
+            selectedMove.setIcon(prevChosenCell.getIcon());
         }
         else if(prevChosenCell.CONTAINS == 3) {
-            if(selectedMove.posY == 0) {
-                selectedMove.CONTAINS = 9;
+            if(selectedMove.posY == 0) { // If a white pawn at play reaches the black's base
+                selectedMove.CONTAINS = 9; // Then it becomes a white queen
                 selectedMove.setIcon(new ImageIcon(chessboard.createImage("images/WhiteQueen.png",55,55)));
-            } else if(selectedMove.posY == 7) {
-                selectedMove.CONTAINS = 9;
+            } else if(selectedMove.posY == 7) { // If a black pawn at play reaches the white's base
+                selectedMove.CONTAINS = 9; // Then it becomes a black queen
                 selectedMove.setIcon(new ImageIcon(chessboard.createImage("images/BlackQueen.png",55,55)));
-            } else {
-                selectedMove.CONTAINS = prevChosenCell.CONTAINS; 
-                selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            } else { // If any pawn moves anywhere on the middle part of the middle
+                selectedMove.CONTAINS = prevChosenCell.CONTAINS;  // Then they are as they are
+                selectedMove.setIcon(prevChosenCell.getIcon()); // The newly clicked cell will contain the text of the previous cell
             }   
         } else { 
-            selectedMove.CONTAINS = prevChosenCell.CONTAINS; //The newly clicked cell will contain the color of the previous cell
-            selectedMove.setIcon(prevChosenCell.getIcon()); //The newly clicked cell will contain the text of the previous cell
+            selectedMove.CONTAINS = prevChosenCell.CONTAINS; // The newly clicked cell will contain the piece of the previous cell
+            selectedMove.setIcon(prevChosenCell.getIcon()); // The newly clicked cell will have the icon piece of the previous cell
         }
-        selectedMove.pieceColor = prevChosenCell.pieceColor;
-        selectedMove.piece = selectedMove.getIcon();
+        selectedMove.pieceColor = prevChosenCell.pieceColor; // The newly clicked cell will contain the piece color of the previous cell
+        selectedMove.piece = selectedMove.getIcon(); // // The newly clicked cell will contain the icon piece of the previous cell
 
         return selectedMove;
     }
@@ -177,7 +177,7 @@ public class Main {
     public static int specialPieceHandler(Cells chosenCell) {
         int enemyPresent = 0;
 
-        //check surrounding of the cell
+        // Check surrounding of the cell
         if (chosenCell.posX - 1 >= 0 && chosenCell.posY + (chosenCell.pieceColor) >= 0) {
             if (chessboard.getCells()[chosenCell.posX - 1][chosenCell.posY + (chosenCell.pieceColor)].pieceColor == -chosenCell.pieceColor)
                 enemyPresent++;
@@ -199,40 +199,43 @@ public class Main {
         int y = chosenCell.posY + (currentColorPiece * moves[i][1]);
         
         if(x >= 0 && x < 8 && y >= 0 && y < 8 && chessboard.getCells()[x][y].pieceColor != currentColorPiece)
-            return chessboard.getCells()[x][y];
+            return chessboard.getCells()[x][y]; // return the cell at x-y position if a calculated available move does not contain same piece color
 
-        return null;
+        return null; // else, return null
     }
 
     public static void suggestAvailCells(Cells chosenCell, int currentColorPiece, boolean isSuggesting) {
         int piece = chosenCell.CONTAINS;
         Cells futureCells;
 
-        if(currentColorPiece == 0) return;
+        if(currentColorPiece == 0) return; 
 
+        // Suggest moves from the pieces' movesets
         int[][] moves = MoveSets.getAvailableMoves(piece);
         for (int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
             futureCells = calculateAvailMove(chosenCell, currentColorPiece, i, moves);
             if(futureCells == null) {
-                if(chosenCell.CONTAINS == 5) break;
-                else continue;
+                if(chosenCell.CONTAINS == 5) break; // If a selected piece is a pawn at start and its first suggested move is blocked by a piece of same color, then it will stop suggesting moves
+                else continue; // else if a selected piece is any piece aside from a pawn and its suggested move is blocked by a piece of same color, then proceed to other suggestions
             }
 
             if(futureCells.CONTAINS != 0) {
-                if(chosenCell.CONTAINS == 3 || chosenCell.CONTAINS == 5) break;
+                if(chosenCell.CONTAINS == 3 || chosenCell.CONTAINS == 5) break; // If a selected piece is a pawn at start and its first suggested move is blocked by a piece of different color, then it will stop suggesting moves
             }
 
-            if(!isSuggesting) {
-                if(futureCells.CONTAINS == 2) {
+            if(!isSuggesting) { // If a move is calculated only for checking purposes
+                if(futureCells.CONTAINS == 2) { // And if a future move contains a king, then make check status to true
                     checkedPiece = futureCells.pieceColor;
                     isCheck = true;
                     break;
                 }
-            } else futureCells.setBackground(Color.GREEN);
+            } else futureCells.setBackground(Color.GREEN); // else if a move of any piece aside from a pawn is calculated for suggesting, then set a cell to green
 
-            if(futureCells.CONTAINS != 0) continue;
+            if(futureCells.CONTAINS != 0) continue; // If a selected piece is any piece aside from a pawn and its suggested move that turned green has a piece of the enemy, then proceed to other suggestions
 
+            // If a selected piece is a bishop, a rook, or a queen
             if(chosenCell.CONTAINS == 7 || chosenCell.CONTAINS == 8 || chosenCell.CONTAINS == 9) {
+                // Then iteratively suggest available moves till the end of the sides of the board
                 while (true) {
                     futureCells = calculateAvailMove(futureCells, currentColorPiece, i, moves);
                     if(futureCells == null) break;
@@ -250,13 +253,18 @@ public class Main {
             } 
         }
 
+        // After suggesting moves from the pieces' movesets and if a selected piece is a pawn at start or at play
         if(chosenCell.CONTAINS == 5 || chosenCell.CONTAINS == 3) {
-            piece = specialPieceHandler(chosenCell);
+            piece = specialPieceHandler(chosenCell); // Check if there are enemy to capture. If there are, then pawn temporarily becomes pawn at attack
+            
+            if(piece != 4) return; // If there are no enemy to capture, then stop method
+
+            // Suggest moves from the pieces' movesets
             moves = MoveSets.getAvailableMoves(piece);
             for(int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
                 futureCells = calculateAvailMove(chosenCell, currentColorPiece, i, moves);
-                if(futureCells == null) {
-                    continue;
+                if(futureCells == null) { 
+                    continue; // If a suggested move is blocked by a piece of same color, then proceed to other suggestions
                 }
     
                 if(!isSuggesting) {
@@ -267,14 +275,14 @@ public class Main {
                     }
                 } else {
                     if(futureCells.CONTAINS != 0) {
-                        if(futureCells.posX == chosenCell.posX + 0) continue;
-                        futureCells.setBackground(Color.GREEN);
+                        futureCells.setBackground(Color.GREEN); // If a suggested move has an enemy, then set a cell to green
                     }
                 }
             }
         }
     }
 
+    // Calculate future moves for next turn and check if a move checks a king
     public static void calculateFutureMove(Cells[][] board, boolean isSuggesting) {
         for(Cells[] cells : board) {
             for(Cells cell : cells ) {
@@ -284,6 +292,7 @@ public class Main {
         }
     }
 
+    // Repaint the board to default
     public static void resetAvailCells(Cells[][] board) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -298,15 +307,16 @@ public class Main {
     }
 
     public static void check() {
-        if(!isCheck) {
+        if(!isCheck) { // If a king is not checked
             chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.GREEN);
             chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
-        } else {
+        } else { // else if a king is checked
             chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW);
             chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
 
+            // If a king is checked and a move made makes a king still checked
             if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) {
-                undo();
+                undo(); // Undo, as if a move is not made
             }
 
             if(checkedPiece == -1) {
@@ -323,6 +333,7 @@ public class Main {
         }
     }
 
+    // Revert move to previous placements
     public static void undo() {
         if(turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
             return;
