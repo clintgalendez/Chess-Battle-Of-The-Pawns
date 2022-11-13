@@ -93,6 +93,9 @@ public class Main {
                 // Move the clicked piece to the chosen cell
                 turnHandler.getCurrentPlayer().addMove(changeCellProperties(chosenCell));
     
+                Cells prevSelectedCell = new Cells(prevChosenCell.CONTAINS, prevChosenCell.pieceColor, prevChosenCell.piece);
+                turnHandler.getCurrentPlayer().addMove(prevSelectedCell);
+
                 // Reset the previously clicked cell
                 prevChosenCell.CONTAINS = 0;
                 prevChosenCell.pieceColor = 0;
@@ -435,22 +438,20 @@ public class Main {
         turnHandler.nextTurn();
         Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
 
-        Cells prevCell = prevMoves.pop();
-        Cells currentCell = prevMoves.pop();
-        Cells chosenCell = prevMoves.pop();
+        Cells prevCell = prevMoves.pop(); // 0, 0, null
+        Cells prevSelectedCell = prevMoves.pop();
+        Cells currentCell = prevMoves.pop(); // 5, -1, pawn
+        Cells selectedCell = prevMoves.pop(); // 0, 0 null
 
-        prevCell.CONTAINS = currentCell.CONTAINS;
-        prevCell.setIcon(currentCell.piece);
-        prevCell.piece = currentCell.piece;
-        prevCell.pieceColor = currentCell.pieceColor;
+        prevCell.CONTAINS = prevSelectedCell.CONTAINS;
+        prevCell.setIcon(prevSelectedCell.piece);
+        prevCell.piece = prevSelectedCell.piece;
+        prevCell.pieceColor = prevSelectedCell.pieceColor;
 
-        currentCell.CONTAINS = chosenCell.CONTAINS;
-        currentCell.setIcon(chosenCell.piece);
-        currentCell.piece = chosenCell.piece;
-        currentCell.pieceColor = chosenCell.pieceColor;
-
-        if(prevCell.CONTAINS == 3 && (prevCell.posY == 1 || prevCell.posY == 6)) // If a pawn at play is undone and is at its starting point
-            prevCell.CONTAINS = 5; // Make it into a pawn at start
+        currentCell.CONTAINS = selectedCell.CONTAINS;
+        currentCell.setIcon(selectedCell.piece);
+        currentCell.piece = selectedCell.piece;
+        currentCell.pieceColor = selectedCell.pieceColor;
 
         isSuggesting = false;
         calculateFutureMove();
