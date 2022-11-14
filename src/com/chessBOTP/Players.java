@@ -10,15 +10,17 @@ public class Players {
 
     private final Stack<Cells> playerMoves = new Stack<>();
 
+    private boolean isCheck = false;
     private boolean isDraw = false;
     private final boolean isCheckMate = false;
 
     public Players(String name, int color) {
+        
         playerName = name;
         playerColor = color;
     }
 
-    public String getPlayer1Name() {
+    public String getPlayerName() {
         return playerName;
     }
 
@@ -36,6 +38,14 @@ public class Players {
 
     public Stack<Cells> getMove() {
         return playerMoves;
+    }
+
+    public void setCheck(boolean isCheck) {
+        this.isCheck = isCheck;
+    }
+
+    public boolean isCheck() {
+        return isCheck;
     }
 
     public boolean isCheckMate() {
