@@ -4,36 +4,132 @@ package com.chessBOTP;
 
 import com.gui.Chessboard;
 
-import java.awt.*;
+import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Stack;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 
 public class Main {
-    static Chessboard chessboard = new Chessboard();
+    private ArrayList<Cells> moveList = new ArrayList<>();
 
-    static ArrayList<Cells> moveList = new ArrayList<>();
+    private boolean gameStarted = false;
+    private boolean allowedToMove = false;
+    private boolean isSuggesting = false;
+    private boolean onAuto = false;
+
+    private int[] coordinates = {0, 0, 0, 0};
+    private int checkedPiece;
+
+    private Cells prevChosenCell;
+
+    private Players player1;
+    private Players player2;
+
+    private TurnBasedHandler turnHandler;
+
+    private Chessboard chessboard;
     
-    static Players player1;
-    static Players player2;
+    public Main() {
+        Action action = new AbstractAction("Undo") {
+            private static final long serialVersionUID = 1L;
+    
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Cells chosenCell = (Cells) e.getSource();
+    
+                if(!gameStarted) return;
+        
+                // Deselect a piece
+                if(prevChosenCell == chosenCell) {
+                    resetAvailCells(chessboard.getCells());
+                    prevChosenCell = null;
+                    allowedToMove = false;
+                    isSuggesting = false;
+                    return;
+                }
+        
+                // Move a piece to a chosen suggested cell after selecting a piece to move
+                if(allowedToMove) {
+                    turnHandler.getCurrentPlayer().setCheck(false); // Change check status of current player to false after making a move
+        
+                    /*
+                    * get the color of the cell that is clicked and check if it is green
+                    * for green means that it is available to be moved to.
+                    */
+                    Color color = chosenCell.getBackground();
+                    if(color != Color.GREEN) return;
+        
+                    /*
+                    * get the icon of the cell that is clicked and check if it is a piece
+                    * for it means that it will be added to current player's captured board
+                    */
+                    if(chosenCell.getIcon() != null) {
+                        chessboard.addToCapturedBoard(chosenCell, coordinates);
+                        if(chosenCell.pieceColor == 1) {
+                            coordinates[1]++;
+                            if(coordinates[1] > 3) {
+                                coordinates[0]++;
+                                coordinates[1] = 0;
+                            } 
+                        } else if(chosenCell.pieceColor == -1) {
+                            coordinates[3]++;
+                            if(coordinates[3] > 3) {
+                                coordinates[2]++;
+                                coordinates[3] = 0;
+                            }
+                        }
+                    }
+        
+                    // Store chosen cell piece properties for undo purposes
+                    Cells selectedCell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
+                    turnHandler.getCurrentPlayer().addMove(selectedCell);
+        
+                    // Move the clicked piece to the chosen cell and store its properties for undo purposes
+                    turnHandler.getCurrentPlayer().addMove(changeCellProperties(chosenCell));
+        
+                    // Store previously chosen cell piece properties for undo purposes
+                    Cells prevSelectedCell = new Cells(prevChosenCell.CONTAINS, prevChosenCell.pieceColor, prevChosenCell.piece);
+                    turnHandler.getCurrentPlayer().addMove(prevSelectedCell);
 
-    static TurnBasedHandler turnHandler;
+                    // Reset the previously clicked cell and store its properties for undo purposes
+                    prevChosenCell.CONTAINS = 0;
+                    prevChosenCell.pieceColor = 0;
+                    prevChosenCell.setIcon(null);
+                    prevChosenCell.piece = prevChosenCell.getIcon();
+                    turnHandler.getCurrentPlayer().addMove(prevChosenCell);
+        
+                    isSuggesting = false;
+                    calculateFutureMove(); // Calculate future moves after making a move if they result to a check
+        
+                    turnHandler.nextTurn(); // Change the turn to the next player
+                    isCheck(turnHandler.getCurrentPlayer()); // After the turn, check if the current player is checked
+                    if(turnHandler.getCurrentPlayer().isCheck()) isCheckmate(chessboard.getCells()); // If the current player is checked, check for a checkmate
+        
+                    allowedToMove = false;
+                    resetAvailCells(chessboard.getCells());
+                    return;
+                }
+        
+                // Select which piece to move and suggest available cells
+                if(turnHandler.getCurrentPlayer().getPlayerColor() == chosenCell.pieceColor) {
+                    chosenCell.setBackground(Color.YELLOW);
 
-    static boolean gameStarted = false;
-    static boolean allowedToMove = false;
-    static boolean isCheck = false;
-    static boolean isSuggesting = false;
-    static boolean onAuto = false;
+                    isSuggesting = true;
+                    suggestAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor());
 
-    static Cells prevChosenCell;
+                    prevChosenCell = chosenCell;
+                    allowedToMove = true;
+                }
+            }
+        };
+        
+        chessboard = new Chessboard(action, this);
 
-    static int checkedPiece;
-    static int[] coordinates = {0, 0, 0, 0};
-
-    public static void main(String[] args) {
         //Create another thread for MainWindow
         Thread GUI = new Thread(new Runnable() {
             @Override
@@ -54,7 +150,11 @@ public class Main {
         game.start();
     }
 
-    public static void play() {
+    public static void main(String[] args) {
+        new Main();
+    }
+
+    public void play() {
         // Flow of the Program 
         player1 = new Players("Player 1", -1); // Create Player 1
         player2 = new Players("Player 2", 1); // Create Player 2
@@ -62,91 +162,7 @@ public class Main {
         gameStarted = true;
     }
 
-    public static void buttonClickedHandler(ActionEvent e) {
-        Cells chosenCell = (Cells) e.getSource();
-
-        if(!gameStarted) return;
-
-        // Deselect a piece
-        if(prevChosenCell == chosenCell) {
-            resetAvailCells(chessboard.getCells());
-            prevChosenCell = null;
-            allowedToMove = false;
-            isSuggesting = false;
-            return;
-        }
-
-        // Move a piece to a chosen suggested cell after selecting a piece to move
-        if(allowedToMove) {
-            isCheck = false; // Make check status to false after making a move
-
-            /*
-             * get the color of the cell that is clicked and check if it is green
-             * for green means that it is available to be moved to.
-             */
-            Color color = chosenCell.getBackground();
-            if(color != Color.GREEN) return;
-
-            /*
-             * get the icon of the cell that is clicked and check if it is a piece
-             * for it means that it will be added to current player's captured board
-             */
-            if(chosenCell.getIcon() != null) {
-                chessboard.addToCapturedBoard(chosenCell, coordinates);
-                if(chosenCell.pieceColor == 1) {
-                    coordinates[1]++;
-                    if(coordinates[1] > 3) {
-                        coordinates[0]++;
-                        coordinates[1] = 0;
-                    } 
-                } else if(chosenCell.pieceColor == -1) {
-                    coordinates[3]++;
-                    if(coordinates[3] > 3) {
-                        coordinates[2]++;
-                        coordinates[3] = 0;
-                    }
-                }
-            }
-
-            // Store chosen cell piece properties for undo purposes
-            Cells selectedCell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
-            turnHandler.getCurrentPlayer().addMove(selectedCell);
-
-            // Move the clicked piece to the chosen cell
-            turnHandler.getCurrentPlayer().addMove(changeCellProperties(chosenCell));
-
-            // Reset the previously clicked cell
-            prevChosenCell.CONTAINS = 0;
-            prevChosenCell.pieceColor = 0;
-            prevChosenCell.setIcon(null);
-            prevChosenCell.piece = prevChosenCell.getIcon();
-            turnHandler.getCurrentPlayer().addMove(prevChosenCell);
-
-            
-            isSuggesting = false;
-            calculateFutureMove(); // Calculate future moves if they result to a check
-
-            turnHandler.nextTurn(); // Change the turn to the next player
-            check(); // Check if the move makes a check
-
-            if(isCheck == true) isCheckmate(); // If a king is checked, check for a checkmate
-
-            allowedToMove = false;
-            resetAvailCells(chessboard.getCells());
-            return;
-        }
-
-        // Select which piece to move and suggest available cells
-        if(turnHandler.getCurrentPlayer().getPlayerColor() == chosenCell.pieceColor) {
-            chosenCell.setBackground(Color.YELLOW);
-            isSuggesting = true;
-            suggestAvailCells(chosenCell, turnHandler.getCurrentPlayer().getPlayerColor());
-            prevChosenCell = chosenCell;
-            allowedToMove = true;
-        }
-    }
-
-    public static Cells changeCellProperties(Cells selectedMove) {
+    public Cells changeCellProperties(Cells selectedMove) {
         if(prevChosenCell.CONTAINS == 5) { // If a selected piece to move is a pawn at start having two moves forward
             selectedMove.CONTAINS = 3; // Then change it to pawn at play having one move forward only
             selectedMove.setIcon(prevChosenCell.getIcon());
@@ -162,7 +178,7 @@ public class Main {
                 selectedMove.CONTAINS = prevChosenCell.CONTAINS;  // Then they are as they are
                 selectedMove.setIcon(prevChosenCell.getIcon()); // The newly clicked cell will contain the text of the previous cell
             }   
-        } else { 
+        } else { // For any piece aside from pawns
             selectedMove.CONTAINS = prevChosenCell.CONTAINS; // The newly clicked cell will contain the piece of the previous cell
             selectedMove.setIcon(prevChosenCell.getIcon()); // The newly clicked cell will have the icon piece of the previous cell
         }
@@ -172,10 +188,10 @@ public class Main {
         return selectedMove;
     }
 
-    public static int specialPieceHandler(Cells chosenCell) {
+    public int pawnAttack(Cells chosenCell) {
         int enemyPresent = 0;
 
-        // Check surrounding of the cell for an enemy
+        // Check surrounding of the cell for the next player's pieces
         if (chosenCell.posX - 1 >= 0 && chosenCell.posY + (chosenCell.pieceColor) >= 0) {
             if (chessboard.getCells()[chosenCell.posX - 1][chosenCell.posY + (chosenCell.pieceColor)].pieceColor == -chosenCell.pieceColor)
                 enemyPresent++;
@@ -186,13 +202,13 @@ public class Main {
             
         }
 
-        // Return pawn attack mode if enemy is present
+        // Return pawn attack mode if next player's pieces are present
         if (enemyPresent > 0) return 4;
         
         return chosenCell.CONTAINS;
     }
 
-    public static Cells calculateAvailMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
+    private Cells calculateAvailMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
         int x = chosenCell.posX + moves[i][0];
         int y = chosenCell.posY + (currentColorPiece * moves[i][1]);
         
@@ -202,7 +218,7 @@ public class Main {
         return null; // else, return null
     }
 
-    public static void suggestAvailCells(Cells chosenCell, int currentColorPiece) {
+    public void suggestAvailCells(Cells chosenCell, int currentColorPiece) {
         int piece = chosenCell.CONTAINS; // Get what piece the chosen cell is
         Cells futureCells;
 
@@ -223,19 +239,23 @@ public class Main {
                 break; // Stop suggesting moves
             }
 
-            if(onAuto) { // If a move is calculated only for checkmate purposes
+            if(onAuto) { // (FOR CHECKMATE PURPOSES) Add move to movelist after it is calculated
                 moveList.add(futureCells);
             }
 
-            if(!isSuggesting) { // If a move is calculated only for checking purposes
+            if(!isSuggesting) { // (FOR CHECKING PURPOSES)
                 if(futureCells.CONTAINS == 2) { // And if a future move contains a king
                     checkedPiece = futureCells.pieceColor; // Get the piece color of the checked king
-                    isCheck = true; // Make check status to true
-                    break; // Stop calculation
+                    if(checkedPiece != turnHandler.getCurrentPlayer().getPlayerColor()) { // If checked piece is of the next player
+                        turnHandler.getNextPlayer().setCheck(true); // Change check status of next player to true
+                    } else { // else if the checked piece is of the current player
+                        turnHandler.getCurrentPlayer().setCheck(true); // Change check status of current player to true
+                    }
+                    break;
                 }
-            } else futureCells.setBackground(Color.GREEN); // else if a move of any piece is calculated for suggesting, then set a cell to green
+            } else futureCells.setBackground(Color.GREEN); // (FOR MAKING MOVE PURPOSES) set a cell to green
 
-            if(futureCells.CONTAINS != 0) continue; // If a selected piece is any piece aside from a pawn and its suggested move that turned green has a piece of the enemy, then proceed to other suggestions
+            if(futureCells.CONTAINS != 0) continue; // If a selected piece is any piece aside from a pawn and its suggested move that turned green has a piece of the next player, then proceed to other suggestions
 
             // If a selected piece is a bishop, a rook, or a queen
             if(chosenCell.CONTAINS == 7 || chosenCell.CONTAINS == 8 || chosenCell.CONTAINS == 9) {
@@ -244,14 +264,18 @@ public class Main {
                     futureCells = calculateAvailMove(futureCells, currentColorPiece, i, moves);
                     if(futureCells == null) break;
 
-                    if(onAuto) {
+                    if(onAuto)  {
                         moveList.add(futureCells);
                     }
 
                     if(!isSuggesting) {
                         if(futureCells.CONTAINS == 2) {
                             checkedPiece = futureCells.pieceColor;
-                            isCheck = true;
+                            if(checkedPiece != turnHandler.getCurrentPlayer().getPlayerColor()) {
+                                turnHandler.getNextPlayer().setCheck(true);
+                            } else {
+                                turnHandler.getCurrentPlayer().setCheck(true);
+                            }
                             break;
                         }
                     } else futureCells.setBackground(Color.GREEN);
@@ -263,31 +287,34 @@ public class Main {
 
         // After suggesting moves from the pieces' movesets and if a selected piece is a pawn at start or at play
         if(chosenCell.CONTAINS == 5 || chosenCell.CONTAINS == 3) {
-            piece = specialPieceHandler(chosenCell); // Check if there are enemy to capture. If there are, then pawn temporarily becomes pawn at attack
+            piece = pawnAttack(chosenCell); // Check if there are pieces of next player to capture. If there are, then pawn temporarily becomes pawn at attack
             
-            if(piece != 4) return; // If there are no enemy to capture, then stop method
+            if(piece != 4) return; // If there are no pieces of next player to capture, then stop method
 
-            // Suggest moves from the piece's moveset
             moves = MoveSets.getAvailableMoves(piece);
             for(int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
                 futureCells = calculateAvailMove(chosenCell, currentColorPiece, i, moves);
                 if(futureCells == null) { 
-                    continue; // If a suggested move is blocked by a piece of same color, then proceed to other suggestions
+                    continue;
                 }
     
-                if(onAuto) {
+                if(onAuto)  {
                     moveList.add(futureCells);
                 }
 
                 if(!isSuggesting) {
-                    if(futureCells.CONTAINS == 2) {
-                        checkedPiece = futureCells.pieceColor;
-                        isCheck = true;
+                    if(futureCells.CONTAINS == 2) { 
+                        checkedPiece = futureCells.pieceColor; 
+                        if(checkedPiece != turnHandler.getCurrentPlayer().getPlayerColor()) {
+                            turnHandler.getNextPlayer().setCheck(true);
+                        } else {
+                            turnHandler.getCurrentPlayer().setCheck(true);
+                        }
                         break;
                     }
                 } else {
                     if(futureCells.CONTAINS != 0) {
-                        futureCells.setBackground(Color.GREEN); // If a suggested move has an enemy, then set a cell to green
+                        futureCells.setBackground(Color.GREEN); // If a suggested move has a piece of the next player, then set a cell to green
                     }
                 }
             }
@@ -295,7 +322,7 @@ public class Main {
     }
 
     // Calculate future moves for next turn and check if a move checks a king
-    public static void calculateFutureMove() {
+    public void calculateFutureMove() {
         Cells[][] board = chessboard.getCells();
         for(Cells[] cells : board) {
             for(Cells cell : cells ) {
@@ -306,7 +333,7 @@ public class Main {
     }
 
     // Repaint the board to default
-    public static void resetAvailCells(Cells[][] board) {
+    public void resetAvailCells(Cells[][] board) {
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 if(((j % 2 == 1) && (i % 2 == 1))
@@ -319,71 +346,109 @@ public class Main {
         }
     }
 
-    public static void check() {
-        if(!isCheck) { // If a king is not checked
-            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.GREEN);
-            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
-        } else { // else if a king is checked
-            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW);
-            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153));
+    // Make changes in GUI if a player is checked
+    public void isCheck(Players player) {
+        if(player.isCheck() && turnHandler.getNextPlayer().isCheck()) { // (FOR CHECKMATE PURPOSES) If both player becomes checked
+            Icon icon = undo();
+            undoCapturedBoard(icon);
+            return;
+        }
 
-            // If a king is checked and another move made makes a king still checked
-            if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) {
+        if(player.isCheck()) { // If current player is checked
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.YELLOW); // change own name panel to yellow
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153)); // change next player's panel to default
+        } else if(turnHandler.getNextPlayer().isCheck()) { // If the previous player is still checked
+            if(turnHandler.getNextPlayer().getPlayerColor() == checkedPiece) { // If the checked piece is of the previous player
                 Icon icon = undo(); // Undo, as if a move is not made
                 undoCapturedBoard(icon);
+                
+                return;
             }
+        }
+
+        if(!player.isCheck()) { // If current player is not checked
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.GREEN); // Change own name panel to green
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(new Color(214, 188, 153)); // change next player's panel to default
         }
     }
 
-    public static void isCheckmate() {
+    public void isCheckmate(Cells[][] board) {
         boolean stalemated = checkForCheckmate();
-        if(stalemated == true) {
-            for(Cells[] cells : chessboard.getCells()) {
-                for(Cells cell : cells) 
+        if(stalemated == true) { // If the next player is checkmated
+            // Disable all cells
+            for(Cells[] cells : board) {
+                for(Cells cell : cells) {
                     cell.setEnabled(false);
-                    chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.RED);
-                    chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(Color.GREEN);
+                    cell.setDisabledIcon(cell.getIcon());
+                }
             }
+
+            // Change the color of the name panel of the loser to red, while green for the winner
+            chessboard.getNamePanel(turnHandler.getCurrentPlayer()).setBackground(Color.RED);
+            chessboard.getNamePanel(turnHandler.getNextPlayer()).setBackground(Color.GREEN);
         }
     }
 
-    public static boolean checkForCheckmate() {
+    private boolean checkForCheckmate() {
         for(Cells[] cells : chessboard.getCells()) {
             for(Cells cell : cells) {
-                if(cell.pieceColor != checkedPiece) continue;
-                System.out.println(cell.CONTAINS);
+                if(cell.pieceColor != turnHandler.getCurrentPlayer().getPlayerColor()) continue; // Check only the pieces of current player
 
-                moveList.clear();
-                onAuto = true;
-                suggestAvailCells(cell, cell.pieceColor);
+                moveList.clear(); // clear the movelist
+                onAuto = true; // Set the purpose to checkmate purposes
+                suggestAvailCells(cell, cell.pieceColor); // Store suggested moves
+                onAuto = false; // Disable purpose
 
-                if(moveList.isEmpty()) continue;
+                if(moveList.isEmpty()) continue; // If a piece has no move, then proceed to other pieces
 
-                if(doMoves(cell) == false) {
-                    isCheck = true;
-                    return false;
+                if(doMoves(cell) == false) { // If current player has more moves to disable check status
+                    turnHandler.getCurrentPlayer().setCheck(true); // Set current player's check status to true
+                    return false; // Return that the player is not checkmated
                 }
             }
         }
 
-        return true;
+        return true; // Return that the player is checkmated
     }
 
-    public static boolean doMoves(Cells cell) {
+    // Programatically find possible move to disable check status
+    private boolean doMoves(Cells cell) {
         Cells futureCells;
 
         for (int i = 0; i < moveList.size(); i++) {
+            prevChosenCell = cell;
             futureCells = moveList.get(i);
 
             System.out.print("{" + futureCells.posX + ", " + futureCells.posY + "}" + "\n");
 
+            if(futureCells.getIcon() != null) {
+                System.out.println(coordinates[0] + " " + coordinates[1] + " " +
+                                   coordinates[2] + " " + coordinates[3]);
+                chessboard.addToCapturedBoard(futureCells, coordinates);
+                if(futureCells.pieceColor == 1) {
+                    coordinates[1]++;
+                    if(coordinates[1] > 3) {
+                        coordinates[0]++;
+                        coordinates[1] = 0;
+                    } 
+                } else if(futureCells.pieceColor == -1) {
+                    coordinates[3]++;
+                    if(coordinates[3] > 3) {
+                        coordinates[2]++;
+                        coordinates[3] = 0;
+                    }
+                }
+            }
+
             // Store chosen cell piece properties for undo purposes
             Cells selectedCell = new Cells(futureCells.CONTAINS, futureCells.pieceColor, futureCells.piece);
             turnHandler.getCurrentPlayer().addMove(selectedCell);
-            prevChosenCell = cell;
             
             // Move the clicked piece to the chosen cell
             turnHandler.getCurrentPlayer().addMove(changeCellProperties(futureCells));
+
+            Cells prevSelectedCell = new Cells(prevChosenCell.CONTAINS, prevChosenCell.pieceColor, prevChosenCell.piece);
+            turnHandler.getCurrentPlayer().addMove(prevSelectedCell);
 
             // Reset the previously clicked cell
             prevChosenCell.CONTAINS = 0;
@@ -392,17 +457,20 @@ public class Main {
             prevChosenCell.piece = prevChosenCell.getIcon();
             turnHandler.getCurrentPlayer().addMove(prevChosenCell);
 
-            onAuto = false;
-            isCheck = false;
+            turnHandler.getNextPlayer().setCheck(false);
+            turnHandler.getCurrentPlayer().setCheck(false);
+            
             // Calculate future moves if they result to a check
             isSuggesting = false;
             calculateFutureMove();
+            System.out.println(turnHandler.getCurrentPlayer().isCheck());
+            turnHandler.nextTurn();
+            isCheck(turnHandler.getCurrentPlayer()); // Check if the move makes a check
 
-            turnHandler.nextTurn(); // Change the turn to the next player
-            check(); // Check if the move makes a check
-
-            if(isCheck == false) {
-                undo(); 
+            if(!turnHandler.getCurrentPlayer().isCheck()) {
+                System.out.println(turnHandler.getNextPlayer().isCheck());
+                Icon icon = undo(); 
+                undoCapturedBoard(icon);
                 return false;
             }
         }
@@ -410,11 +478,9 @@ public class Main {
     }
 
     // Revert move to previous placements
-    public static Icon undo() {
+    public Icon undo() {
         if(turnHandler.getCurrentPlayer().getMove().isEmpty() && turnHandler.getNextPlayer().getMove().isEmpty())
             return null;
-        
-        isCheck = false;
 
         resetAvailCells(chessboard.getCells());
         prevChosenCell = null;
@@ -423,31 +489,32 @@ public class Main {
         turnHandler.nextTurn();
         Stack<Cells> prevMoves = turnHandler.getCurrentPlayer().getMove();
 
-        Cells prevCell = prevMoves.pop();
-        Cells currentCell = prevMoves.pop();
-        Cells chosenCell = prevMoves.pop();
+        Cells prevCell = prevMoves.pop(); // 0, 0, null
+        Cells prevSelectedCell = prevMoves.pop();
+        Cells currentCell = prevMoves.pop(); // 5, -1, pawn
+        Cells selectedCell = prevMoves.pop(); // 0, 0 null
 
-        prevCell.CONTAINS = currentCell.CONTAINS;
-        prevCell.setIcon(currentCell.piece);
-        prevCell.piece = currentCell.piece;
-        prevCell.pieceColor = currentCell.pieceColor;
+        prevCell.CONTAINS = prevSelectedCell.CONTAINS;
+        prevCell.setIcon(prevSelectedCell.piece);
+        prevCell.piece = prevSelectedCell.piece;
+        prevCell.pieceColor = prevSelectedCell.pieceColor;
 
-        currentCell.CONTAINS = chosenCell.CONTAINS;
-        currentCell.setIcon(chosenCell.piece);
-        currentCell.piece = chosenCell.piece;
-        currentCell.pieceColor = chosenCell.pieceColor;
+        currentCell.CONTAINS = selectedCell.CONTAINS;
+        currentCell.setIcon(selectedCell.piece);
+        currentCell.piece = selectedCell.piece;
+        currentCell.pieceColor = selectedCell.pieceColor;
 
-        if(prevCell.CONTAINS == 3 && (prevCell.posY == 1 || prevCell.posY == 6)) // If a pawn at play is undone and is at its starting point
-            prevCell.CONTAINS = 5; // Make it into a pawn at start
-
+        turnHandler.getNextPlayer().setCheck(false);
+        turnHandler.getCurrentPlayer().setCheck(false);
         isSuggesting = false;
         calculateFutureMove();
-        check();
+        isCheck(turnHandler.getCurrentPlayer());
 
         return currentCell.getIcon();
     }
 
-    public static void undoCapturedBoard(Icon icon) {
+    // Revert captured board to previous state
+    public void undoCapturedBoard(Icon icon) {
         if(icon != null) {
             int y, x;
             if(turnHandler.getCurrentPlayer().getPlayerColor() == -1) {
@@ -468,13 +535,14 @@ public class Main {
                 x = coordinates[2];
                 y = coordinates[3];
             }
-
+            if(x >= 0) {
             if(chessboard.getCapturedBoard(turnHandler.getCurrentPlayer())[y][x].getIcon() != null)
                 chessboard.removeFromCapturedBoard(turnHandler.getNextPlayer(), y, x);
+            }
         } 
     }
 
-    public static void arrangeBoard() {
+    private void arrangeBoard() {
         //arrange the board
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
