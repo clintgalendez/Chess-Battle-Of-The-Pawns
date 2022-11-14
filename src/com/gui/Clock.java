@@ -15,7 +15,7 @@ import java.awt.Graphics2D;
 import java.awt.GradientPaint;
 
 
-public class Time extends JPanel {
+public class Clock extends JPanel {
     JLabel timeLabel = new JLabel();
     int elapsedTime = 0;
     int seconds =0;
@@ -48,7 +48,7 @@ public class Time extends JPanel {
         g2d.fillRect(0,0,width,height);
     }
 
-    Time() {
+    Clock() {
         setLayout(new BorderLayout());
 
         timeLabel.setText(hours_string+":"+minutes_string+":"+seconds_string);

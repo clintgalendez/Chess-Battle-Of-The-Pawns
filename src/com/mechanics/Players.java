@@ -1,6 +1,6 @@
 // Players of the game
 
-package com.chessBOTP;
+package com.mechanics;
 
 import java.util.Stack;
 public class Players {

@@ -1,14 +1,15 @@
-package com.Interfaces;
+package com.interfaces;
 
-import com.chessBOTP.Cells;
+import com.mechanics.Cells;
+import com.mechanics.Players;
+
 import javax.swing.Icon;
 
 public interface Mechanics {
-    abstract void play();
     abstract Cells changeCellProperties(Cells selectedMove);
     abstract void suggestAvailCells(Cells chosenCell, int currentColorPiece);
     abstract void calculateFutureMove();
-    abstract void isCheck();
-    abstract void isCheckmate();
+    abstract void isCheck(Players player);
+    abstract void isCheckmate(Cells[][] board);
     abstract Icon undo();
 }
