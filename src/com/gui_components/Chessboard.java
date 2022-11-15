@@ -7,13 +7,16 @@ import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridLayout;
 import java.awt.Insets;
+import java.awt.event.MouseListener;
 
+import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
 import com.handlers.BoardCellsHandler;
 import com.main.GameUI;
 import com.mechanics.Cells;
 
+import javax.swing.BorderFactory;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
@@ -102,6 +105,38 @@ public class Chessboard extends JPanel {
                 cell.setFocusable(false);
                 cell.setBorder(new LineBorder(color3, 1, false));
                 cell.addActionListener(bch);
+
+                cell.addMouseListener(new MouseListener() {
+
+                    @Override
+                    public void mouseClicked(java.awt.event.MouseEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void mousePressed(java.awt.event.MouseEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void mouseReleased(java.awt.event.MouseEvent e) {
+                        // TODO Auto-generated method stub
+                        
+                    }
+
+                    @Override
+                    public void mouseEntered(java.awt.event.MouseEvent e) {
+                        cell.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED, Color.WHITE, Color.BLACK));
+                    }
+
+                    @Override
+                    public void mouseExited(java.awt.event.MouseEvent e) {
+                        cell.setBorder(new LineBorder(color3, 1, false));
+                    }
+                    
+                });
 
                 if (((j % 2 == 1) && (i % 2 == 1))
                         || ((j % 2 == 0) && (i % 2 == 0))) {

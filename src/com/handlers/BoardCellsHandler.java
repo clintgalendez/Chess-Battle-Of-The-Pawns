@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Stack;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -210,7 +211,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                     }
                     break;
                 }
-            } else futureCells.setBackground(Color.GREEN); // (FOR MAKING MOVE PURPOSES) set a cell to green
+            } else {
+                futureCells.setBackground(Color.GREEN); // (FOR MAKING MOVE PURPOSES) set a cell to green
+                futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
+            }
 
             if(futureCells.CONTAINS != 0) continue; // If a selected piece is any piece aside from a pawn and its suggested move that turned green has a piece of the next player, then proceed to other suggestions
 
@@ -235,7 +239,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                             }
                             break;
                         }
-                    } else futureCells.setBackground(Color.GREEN);
+                    } else {
+                        futureCells.setBackground(Color.GREEN);
+                        futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
+                    }
                     
                     if(futureCells.CONTAINS != 0) break;
                 }
@@ -272,6 +279,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 } else {
                     if(futureCells.CONTAINS != 0) {
                         futureCells.setBackground(Color.GREEN); // If a suggested move has a piece of the next player, then set a cell to green
+                        futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
                     }
                 }
             }
