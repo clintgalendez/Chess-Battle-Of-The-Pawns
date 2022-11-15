@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
@@ -25,7 +27,7 @@ import com.loaders.GraphicsLoader;
 import com.mechanics.Cells;
 import com.mechanics.Players;
 
-public class GameUI {
+public class GameUI extends JLayeredPane {
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
     private static final Color CAMEO = new Color(214, 188, 153);
@@ -66,17 +68,18 @@ public class GameUI {
 
     private BoardCellsHandler bch;
 
-    public GameUI() {
+    private JFrame GameWindow;
+
+    private Clock clock = new Clock();;
+
+    public GameUI(JFrame GameWindow) {
+        this.GameWindow = GameWindow;
+
+        setSize(WIDTH, HEIGHT);
+
         init();
         arrangeBoard();
-        //Create another thread for Gameplay
-        Thread game = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                play();
-            }
-        }); 
-        game.start();
+        play();
     }
 
     public void init() {
@@ -89,9 +92,6 @@ public class GameUI {
             e.printStackTrace();
         }
 
-        layeredPane = new JLayeredPane();
-        layeredPane.setSize(WIDTH, HEIGHT);
-
         JLabel gameBackground = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/GameBackground.png", WIDTH, HEIGHT)));
         gameBackground.setSize(WIDTH, HEIGHT);
 
@@ -99,7 +99,7 @@ public class GameUI {
         mainPanel.setOpaque(false);
         mainPanel.setSize(WIDTH, HEIGHT);
 
-        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, this);
+        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, this, clock);
         chessboard.setBounds(320, 50, 625, 625);
 
         piecesBoardOne = new Board(ZEUS, CALICO);
@@ -120,17 +120,29 @@ public class GameUI {
         namePanelTwo = new NamePanel("Player 2", CAMEO, ZEUS, true);
         namePanelTwo.setBounds(958,25,289,100);
 
-        Clock clock = new Clock();
         clock.setBounds(595,10,90,30);
+        
+        SettingsUI SI = new SettingsUI(this, clock);
 
-        undoPanel = new RoundPanel(CAMEO, 10, "resources/Undo.png", new UndoHandler(bch, this));
+        JLabel undo = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Undo.png", 60, 60)));
+        undo.setSize(60, 60);
+        undoPanel = new RoundPanel(CAMEO, 10, new UndoHandler(bch, this));
         undoPanel.setBounds(18,600,60,60);
+        undoPanel.add(undo);
 
-        homePanel = new RoundPanel(CAMEO, 10, "resources/Home.png", new HomeHandler(this));
+        JLabel home = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Home.png", 60, 60)));
+        home.setSize(60, 60);
+
+        homePanel = new RoundPanel(CAMEO, 10,  new HomeHandler(this));
         homePanel.setBounds(1184,600,60,60);
+        homePanel.add(home);
 
-        settingsPanel = new RoundPanel(CAMEO, 10, "resources/Settings.png", new SettingsHandler(this));
+        JLabel settings = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Settings.png", 60, 60)));
+        settings.setSize(60, 60);
+        
+        settingsPanel = new RoundPanel(CAMEO, 10, new SettingsHandler(this, SI, GameWindow, clock));
         settingsPanel.setBounds(1184,530,60,60);
+        settingsPanel.add(settings);
 
         mainPanel.add(chessboard);
         mainPanel.add(piecesBoardOne);
@@ -144,8 +156,10 @@ public class GameUI {
         mainPanel.add(homePanel);
         mainPanel.add(settingsPanel);
 
-        layeredPane.add(gameBackground, Integer.valueOf(0));
-        layeredPane.add(mainPanel, Integer.valueOf(1));
+        add(gameBackground, Integer.valueOf(0));
+        add(mainPanel, Integer.valueOf(1));
+
+        clock.timer.start();
     }
 
     public void play() {
@@ -156,7 +170,7 @@ public class GameUI {
         gameStarted = true;
     }
 
-    private void arrangeBoard() {
+    public void arrangeBoard() {
         //arrange the board
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
@@ -227,6 +241,54 @@ public class GameUI {
                 }
             }
         }
+    }
+
+    public void restart() {
+        for(Cells[] boardCells : cells) {
+            for(Cells boardCell : boardCells) {
+                boardCell.CONTAINS = 0;
+                boardCell.setIcon(null);
+                boardCell.piece = null;
+                boardCell.pieceColor = 0;
+                boardCell.setEnabled(true);
+                boardCell.setDisabledIcon(null);
+            }
+        }
+
+        for(JButton[] buttons : piecesBoardOne.getBoardCells()) {
+            for(JButton button : buttons) {
+                button.setIcon(null);
+            }
+        }
+
+        for(JButton[] buttons : piecesBoardTwo.getBoardCells()) {
+            for(JButton button : buttons) {
+                button.setIcon(null);
+            }
+        }
+
+        for(int i = 0; i < coordinates.length; i++)
+            coordinates[i] = 0;
+        
+        namePanelOne.setBackground(CAMEO);
+        namePanelTwo.setBackground(CAMEO);
+
+        moveList.clear();
+
+        gameStarted = false;
+        allowedToMove = false;
+        isSuggesting = false;
+        onAuto = false;
+
+        checkedPiece = 0;
+
+        prevChosenCell = null;
+        
+        clock.restart();
+        clock.timer.start();
+
+        arrangeBoard();
+        play();
     }
 
     public NamePanel getNamePanel(Players player) {

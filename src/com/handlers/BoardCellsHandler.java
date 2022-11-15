@@ -8,6 +8,7 @@ import java.util.Stack;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
+import com.gui_components.Clock;
 import com.interfaces.Mechanics;
 import com.loaders.GraphicsLoader;
 import com.main.GameUI;
@@ -17,9 +18,11 @@ import com.mechanics.Players;
 
 public class BoardCellsHandler implements Mechanics, ActionListener {
     private GameUI GI;
-
-    public BoardCellsHandler(GameUI GI) {
+    private Clock clock;
+    
+    public BoardCellsHandler(GameUI GI, Clock clock) {
         this.GI = GI;
+        this.clock = clock;
     }
     
     @Override
@@ -329,6 +332,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
     public void isCheckmate(Cells[][] board) {
         boolean stalemated = checkForCheckmate();
         if(stalemated == true) { // If the next player is checkmated
+            clock.timer.stop();
+            
             // Disable all cells
             for(Cells[] cells : board) {
                 for(Cells cell : cells) {

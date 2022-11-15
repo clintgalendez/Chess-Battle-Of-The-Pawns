@@ -20,8 +20,8 @@ import javax.swing.SwingConstants;
 
 public class Chessboard extends JPanel {
 
-    public Chessboard(Cells[][] cells, Color color_one, Color color_two, GameUI GI) {
-        BoardCellsHandler bch = new BoardCellsHandler(GI);
+    public Chessboard(Cells[][] cells, Color color_one, Color color_two, GameUI GI, Clock clock) {
+        BoardCellsHandler bch = new BoardCellsHandler(GI, clock);
         GI.setBCH(bch);
         setLayout(new GridBagLayout());
         setBackground(new Color(49,42,33));

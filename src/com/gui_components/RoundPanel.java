@@ -1,10 +1,6 @@
 package com.gui_components;
 
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
-
-import com.loaders.GraphicsLoader;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,18 +14,14 @@ public class RoundPanel extends JPanel {
     private Color backgroundColor;
     private int cornerRadius = 15;
 
-    public RoundPanel(Color color, int radius, String path, MouseListener l) {
+    public RoundPanel(Color color, int radius, MouseListener l) {
         cornerRadius = radius;
 
         setLayout(null);
         setBackground(color);
         setOpaque(false);
 
-        JLabel undo = new JLabel(new ImageIcon(GraphicsLoader.loadImage(path, 60, 60)));
-        undo.setBounds(0,0,60,60);
-        undo.addMouseListener(l);
-
-        add(undo);
+        addMouseListener(l);
     }
 
     @Override

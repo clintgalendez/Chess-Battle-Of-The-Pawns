@@ -20,25 +20,25 @@ public class HomeHandler implements MouseListener {
 
     @Override
     public void mousePressed(MouseEvent e) {
-        GI.getUndoPanel().setBackground(new Color(47, 38, 29));
+        GI.getHomePanel().setBackground(new Color(47, 38, 29));
         
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        GI.getUndoPanel().setBackground(new Color(71, 64, 55));
+        GI.getHomePanel().setBackground(new Color(71, 64, 55));
         
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        GI.getUndoPanel().setBackground(new Color(71, 64, 55));
+        GI.getHomePanel().setBackground(new Color(71, 64, 55));
         
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        GI.getUndoPanel().setBackground(new Color(214,188,153));
+        GI.getHomePanel().setBackground(new Color(214,188,153));
         
     }
     
