@@ -1,4 +1,4 @@
-package com.gui;
+package com.gui_components;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -48,7 +48,7 @@ public class Clock extends JPanel {
         g2d.fillRect(0,0,width,height);
     }
 
-    Clock() {
+    public Clock() {
         setLayout(new BorderLayout());
 
         timeLabel.setText(hours_string+":"+minutes_string+":"+seconds_string);

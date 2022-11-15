@@ -1,4 +1,4 @@
-package com.gui;
+package com.gui_components;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -14,7 +14,7 @@ import com.loaders.GraphicsLoader;
 public class NamePanel extends JPanel {
     JLabel playerIcon;
 
-    NamePanel(String name, Color color_one, Color color_two, boolean reverse) {
+    public NamePanel(String name, Color color_one, Color color_two, boolean reverse) {
         setLayout(null);
         setBackground(color_one);
         setBorder(new LineBorder(color_two, 2, true)); 

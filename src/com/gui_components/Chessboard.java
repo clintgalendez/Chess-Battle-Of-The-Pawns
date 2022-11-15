@@ -1,4 +1,4 @@
-package com.gui;
+package com.gui_components;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -11,6 +11,7 @@ import java.awt.Insets;
 import javax.swing.border.LineBorder;
 
 import com.handlers.BoardCellsHandler;
+import com.main.GameUI;
 import com.mechanics.Cells;
 
 import javax.swing.JLabel;
@@ -19,7 +20,7 @@ import javax.swing.SwingConstants;
 
 public class Chessboard extends JPanel {
 
-    Chessboard(Cells[][] cells, Color color_one, Color color_two, UI GI) {
+    public Chessboard(Cells[][] cells, Color color_one, Color color_two, GameUI GI) {
         BoardCellsHandler bch = new BoardCellsHandler(GI);
         GI.setBCH(bch);
         setLayout(new GridBagLayout());

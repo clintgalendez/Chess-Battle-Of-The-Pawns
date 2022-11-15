@@ -8,17 +8,17 @@ import java.util.Stack;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import com.gui.UI;
 import com.interfaces.Mechanics;
 import com.loaders.GraphicsLoader;
+import com.main.GameUI;
 import com.mechanics.Cells;
 import com.mechanics.MoveSets;
 import com.mechanics.Players;
 
 public class BoardCellsHandler implements Mechanics, ActionListener {
-    private UI GI;
+    private GameUI GI;
 
-    public BoardCellsHandler(UI GI) {
+    public BoardCellsHandler(GameUI GI) {
         this.GI = GI;
     }
     
@@ -414,12 +414,11 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             // Calculate future moves if they result to a check
             GI.setSuggesting(false);
             calculateFutureMove();
-            System.out.println(GI.getTurnHandler().getCurrentPlayer().isCheck());
+
             GI.getTurnHandler().nextTurn();
             isCheck(GI.getTurnHandler().getCurrentPlayer()); // Check if the move makes a check
 
             if(!GI.getTurnHandler().getCurrentPlayer().isCheck()) {
-                System.out.println(GI.getTurnHandler().getNextPlayer().isCheck());
                 Icon icon = undo(); 
                 undoCapturedBoard(icon);
                 return false;
@@ -486,9 +485,6 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 x = GI.getCoordinates()[2];
                 y = GI.getCoordinates()[3];
             }
-            
-            System.out.println(GI.getCoordinates()[0] + " " + GI.getCoordinates()[1] + " " +
-            GI.getCoordinates()[2] + " " + GI.getCoordinates()[3]);
             
             if(x >= 0) {
             if(GI.getBoard(GI.getTurnHandler().getCurrentPlayer()).getBoardCells()[y][x].getIcon() != null)

@@ -1,4 +1,4 @@
-package com.gui;
+package com.main;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -10,6 +10,12 @@ import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import com.gui_components.Board;
+import com.gui_components.BoardLabel;
+import com.gui_components.Chessboard;
+import com.gui_components.Clock;
+import com.gui_components.NamePanel;
+import com.gui_components.RoundPanel;
 import com.handlers.BoardCellsHandler;
 import com.handlers.HomeHandler;
 import com.handlers.SettingsHandler;
@@ -19,7 +25,7 @@ import com.loaders.GraphicsLoader;
 import com.mechanics.Cells;
 import com.mechanics.Players;
 
-public class UI {
+public class GameUI {
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
     private static final Color CAMEO = new Color(214, 188, 153);
@@ -30,6 +36,10 @@ public class UI {
     private final int HEIGHT = 720;
 
     private JLayeredPane layeredPane;
+
+    private RoundPanel undoPanel;
+    private RoundPanel homePanel;
+    private RoundPanel settingsPanel;
 
     private NamePanel namePanelOne;
     private NamePanel namePanelTwo;
@@ -56,10 +66,17 @@ public class UI {
 
     private BoardCellsHandler bch;
 
-    public UI() {
+    public GameUI() {
         init();
         arrangeBoard();
-        play();
+        //Create another thread for Gameplay
+        Thread game = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                play();
+            }
+        }); 
+        game.start();
     }
 
     public void init() {
@@ -106,13 +123,13 @@ public class UI {
         Clock clock = new Clock();
         clock.setBounds(595,10,90,30);
 
-        RoundPanel undoPanel = new RoundPanel(CAMEO, 10, "resources/Undo.png", new UndoHandler(bch));
+        undoPanel = new RoundPanel(CAMEO, 10, "resources/Undo.png", new UndoHandler(bch, this));
         undoPanel.setBounds(18,600,60,60);
 
-        RoundPanel homePanel = new RoundPanel(CAMEO, 10, "resources/Home.png", new HomeHandler());
+        homePanel = new RoundPanel(CAMEO, 10, "resources/Home.png", new HomeHandler(this));
         homePanel.setBounds(1184,600,60,60);
 
-        RoundPanel settingsPanel = new RoundPanel(CAMEO, 10, "resources/Settings.png", new SettingsHandler());
+        settingsPanel = new RoundPanel(CAMEO, 10, "resources/Settings.png", new SettingsHandler(this));
         settingsPanel.setBounds(1184,530,60,60);
 
         mainPanel.add(chessboard);
@@ -228,6 +245,18 @@ public class UI {
         }
     }
 
+    public RoundPanel getUndoPanel() {
+        return undoPanel;
+    }
+
+    public RoundPanel getHomePanel() {
+        return homePanel;
+    }
+
+    public RoundPanel getSettingsPanel() {
+        return settingsPanel;
+    }
+
     public Cells[][] getCells() {
         return cells;
     }
@@ -238,10 +267,6 @@ public class UI {
 
     public ArrayList<Cells> getMoveList() {
         return moveList;
-    }
-
-    public void setMoveList(ArrayList<Cells> moveList) {
-        this.moveList = moveList;
     }
 
     public boolean isGameStarted() {
@@ -280,10 +305,6 @@ public class UI {
         return coordinates;
     }
 
-    public void setCoordinates(int[] coordinates) {
-        this.coordinates = coordinates;
-    }
-
     public int getCheckedPiece() {
         return checkedPiece;
     }
@@ -304,24 +325,12 @@ public class UI {
         return player1;
     }
 
-    public void setPlayer1(Players player1) {
-        this.player1 = player1;
-    }
-
     public Players getPlayer2() {
         return player2;
     }
 
-    public void setPlayer2(Players player2) {
-        this.player2 = player2;
-    }
-
     public TurnBasedHandler getTurnHandler() {
         return turnHandler;
-    }
-
-    public void setTurnHandler(TurnBasedHandler turnHandler) {
-        this.turnHandler = turnHandler;
     }
 
     public void setBCH(BoardCellsHandler bch) {

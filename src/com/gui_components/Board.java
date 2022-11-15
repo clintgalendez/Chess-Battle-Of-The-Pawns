@@ -1,4 +1,4 @@
-package com.gui;
+package com.gui_components;
 
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -13,7 +13,7 @@ import com.mechanics.Cells;
 public class Board extends JPanel {
     private JButton[][] boardCells = new JButton[4][4];
     
-    Board(Color color_one, Color color_two) {
+    public Board(Color color_one, Color color_two) {
         setLayout(new GridLayout(0,4));
 
         initCapturedBoard(boardCells, color_one, color_two);
