@@ -1,4 +1,4 @@
-package com.chessBOTP;
+package com.mechanics;
 
 import javax.swing.*;
 

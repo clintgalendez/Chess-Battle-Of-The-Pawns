@@ -1,4 +1,4 @@
-package com.chessBOTP;
+package com.mechanics;
 
 public class MoveSets {
     private static final int[][] KNIGHT = {
