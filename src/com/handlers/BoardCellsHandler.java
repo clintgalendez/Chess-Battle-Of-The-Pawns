@@ -18,14 +18,38 @@ import com.mechanics.MoveSets;
 import com.mechanics.Players;
 
 public class BoardCellsHandler implements Mechanics, ActionListener {
-    private GameUI GI;
-    private Clock clock;
-    
+    private final GameUI GI;
+    private final Clock clock;
+
     public BoardCellsHandler(GameUI GI, Clock clock) {
         this.GI = GI;
         this.clock = clock;
     }
-    
+
+    public void moveHandler (Cells chosenCell) {
+        if(chosenCell.getIcon() != null) {
+            if(chosenCell.pieceColor == 1) {
+                GI.getBoard(GI.getPlayer1()).addToCapturedBoard(chosenCell, GI.getCoordinates()[1], GI.getCoordinates()[0]);
+                GI.getCoordinates()[1]++;
+                if(GI.getCoordinates()[1] > 3) {
+                    GI.getCoordinates()[0]++;
+                    GI.getCoordinates()[1] = 0;
+                }
+            } else if(chosenCell.pieceColor == -1) {
+                GI.getBoard(GI.getPlayer2()).addToCapturedBoard(chosenCell, GI.getCoordinates()[3], GI.getCoordinates()[2]);
+                GI.getCoordinates()[3]++;
+                if(GI.getCoordinates()[3] > 3) {
+                    GI.getCoordinates()[2]++;
+                    GI.getCoordinates()[3] = 0;
+                }
+            }
+        }
+
+        // Store chosen cell piece properties for undo purposes
+        Cells selectedCell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
+        GI.getTurnHandler().getCurrentPlayer().addMove(selectedCell);
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         Cells chosenCell = (Cells) e.getSource();
@@ -58,27 +82,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             * get the icon of the cell that is clicked and check if it is a piece
             * for it means that it will be added to current player's captured board
             */
-            if(chosenCell.getIcon() != null) {
-                if(chosenCell.pieceColor == 1) {
-                    GI.getBoard(GI.getPlayer1()).addToCapturedBoard(chosenCell, GI.getCoordinates()[1], GI.getCoordinates()[0]);
-                    GI.getCoordinates()[1]++;
-                    if(GI.getCoordinates()[1] > 3) {
-                        GI.getCoordinates()[0]++;
-                        GI.getCoordinates()[1] = 0;
-                    } 
-                } else if(chosenCell.pieceColor == -1) {
-                    GI.getBoard(GI.getPlayer2()).addToCapturedBoard(chosenCell, GI.getCoordinates()[3], GI.getCoordinates()[2]);
-                    GI.getCoordinates()[3]++;
-                    if(GI.getCoordinates()[3] > 3) {
-                        GI.getCoordinates()[2]++;
-                        GI.getCoordinates()[3] = 0;
-                    }
-                }
-            }
-
-            // Store chosen cell piece properties for undo purposes
-            Cells selectedCell = new Cells(chosenCell.CONTAINS, chosenCell.pieceColor, chosenCell.piece);
-            GI.getTurnHandler().getCurrentPlayer().addMove(selectedCell);
+            moveHandler(chosenCell);
 
             // Move the clicked piece to the chosen cell and store its properties for undo purposes
             GI.getTurnHandler().getCurrentPlayer().addMove(changeCellProperties(chosenCell));
@@ -88,11 +92,9 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             GI.getTurnHandler().getCurrentPlayer().addMove(prevSelectedCell);
 
             // Reset the previously clicked cell and store its properties for undo purposes
-            GI.getPrevChosenCell().CONTAINS = 0;
-            GI.getPrevChosenCell().pieceColor = 0;
-            GI.getPrevChosenCell().setIcon(null);
-            GI.getPrevChosenCell().piece = GI.getPrevChosenCell().getIcon();
+            resetCellProperties(GI.getPrevChosenCell());
             GI.getTurnHandler().getCurrentPlayer().addMove(GI.getPrevChosenCell());
+            GI.setIsCastling(false);
 
             GI.setSuggesting(false);
             calculateFutureMove(); // Calculate future moves after making a move if they result to a check
@@ -118,13 +120,32 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             GI.setPrevChosenCell(chosenCell);
             GI.setAllowedToMove(true);
         }
-    }  
+    }
+
+    public void resetCellProperties(Cells cells) {
+        cells.CONTAINS = 0;
+        cells.pieceColor = 0;
+        cells.setIcon(null);
+        cells.piece = cells.getIcon();
+    }
+
+    public void changePropertiesForCastling(Cells selectedMove, int rookX) {
+        if (GI.getTurnHandler().getCurrentPlayer().getPlayerColor() == -1) {
+            GI.getCells()[rookX][selectedMove.posY].setIcon(new ImageIcon(GraphicsLoader.loadImage("resources/WhiteRook.png",55,55)));
+        } else {
+            GI.getCells()[rookX][selectedMove.posY].setIcon(new ImageIcon(GraphicsLoader.loadImage("resources/BlackRook.png",55,55)));
+        }
+
+        GI.getCells()[rookX][selectedMove.posY].pieceColor = GI.getTurnHandler().getCurrentPlayer().getPlayerColor();
+        GI.getCells()[rookX][selectedMove.posY].piece = GI.getCells()[3][selectedMove.posY].getIcon();
+    }
 
     public Cells changeCellProperties(Cells selectedMove) {
         if(GI.getPrevChosenCell().CONTAINS == 5) { // If a selected piece to move is a pawn at start having two moves forward
             selectedMove.CONTAINS = 3; // Then change it to pawn at play having one move forward only
             selectedMove.setIcon(GI.getPrevChosenCell().getIcon());
         }
+
         else if(GI.getPrevChosenCell().CONTAINS == 3) {
             if(selectedMove.posY == 0) { // If a white pawn at play reaches the black's base
                 selectedMove.CONTAINS = 9; // Then it becomes a white queen
@@ -135,11 +156,29 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             } else { // If any pawn moves anywhere on the middle part of the board
                 selectedMove.CONTAINS = GI.getPrevChosenCell().CONTAINS;  // Then they are as they are
                 selectedMove.setIcon(GI.getPrevChosenCell().getIcon()); // The newly clicked cell will contain the text of the previous cell
-            }   
+            }
+
+        } else if (GI.getPrevChosenCell().CONTAINS == 2 && GI.isCastling()) { //Check if the previous cell is a king and if it is castling
+            //Move the King
+            selectedMove.CONTAINS = GI.getPrevChosenCell().CONTAINS;
+            selectedMove.setIcon(GI.getPrevChosenCell().getIcon());
+
+            //Move the Rook
+            if(selectedMove.posX == 2) { //If the king is moving to the left
+                GI.getCells()[3][selectedMove.posY].CONTAINS = 8; // Change the cell at the right of the king to a rook
+                resetCellProperties(GI.getCells()[0][selectedMove.posY]); // Reset the cell at the left of the king
+                changePropertiesForCastling(selectedMove, 3); // Change the properties of the cell at the right of the king
+            } else if(selectedMove.posX == 6) { //If the king is moving to the right
+                GI.getCells()[5][selectedMove.posY].CONTAINS = 8; // Change the cell at the left of the king to a rook
+                resetCellProperties(GI.getCells()[7][selectedMove.posY]); // Reset the cell at the right of the king
+                changePropertiesForCastling(selectedMove, 5); // Change the properties of the cell at the left of the king
+            }
+
         } else { // For any piece aside from pawns
             selectedMove.CONTAINS = GI.getPrevChosenCell().CONTAINS; // The newly clicked cell will contain the piece of the previous cell
             selectedMove.setIcon(GI.getPrevChosenCell().getIcon()); // The newly clicked cell will have the icon piece of the previous cell
         }
+
         selectedMove.pieceColor = GI.getPrevChosenCell().pieceColor; // The newly clicked cell will contain the piece color of the previous cell
         selectedMove.piece = selectedMove.getIcon(); // // The newly clicked cell will contain the icon piece of the previous cell
 
@@ -164,6 +203,45 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         if (enemyPresent > 0) return 4;
         
         return chosenCell.CONTAINS;
+    }
+
+    public void doKingCastling(int rowToChange) {
+        //check the row of the king if it is empty
+        for (int i = 1; i < 4; i++) {
+            if (GI.getCells()[i][rowToChange].CONTAINS == 0) {
+                GI.setIsCastling(true);
+            } else {
+                GI.setIsCastling(false);
+                break;
+            }
+        }
+
+        if (GI.isCastling()) {
+            GI.getCells()[1][rowToChange].setBackground(Color.GREEN);
+        }
+
+        //check the other side of the king if it is empty
+        for (int i = 5; i < 7; i++) {
+            if (GI.getCells()[i][rowToChange].CONTAINS == 0) {
+                GI.setIsCastling(true);
+            } else {
+                GI.setIsCastling(false);
+                break;
+            }
+        }
+
+        if (GI.isCastling()) {
+            GI.getCells()[6][rowToChange].setBackground(Color.GREEN);
+        }
+    }
+
+    public void KingCastlingCheck(Cells currentCell) {
+        //Check if the king has moved, check if the rook has moved, check if the cells in between are empty
+        if (GI.getCells()[4][currentCell.posY].CONTAINS != 2 || GI.getCells()[0][currentCell.posY].CONTAINS != 8 || GI.getCells()[7][currentCell.posY].CONTAINS != 8) {
+            return;
+        }
+
+        doKingCastling(currentCell.posY);
     }
 
     private Cells calculateAvailMove(Cells chosenCell, int currentColorPiece, int i, int[][]moves) {
@@ -197,26 +275,13 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 break; // Stop suggesting moves
             }
 
-            if(GI.isOnAuto()) { // (FOR CHECKMATE PURPOSES) Add move to movelist after it is calculated
-                GI.getMoveList().add(futureCells);
-            }
-
-            if(!GI.isSuggesting()) { // (FOR CHECKING PURPOSES)
-                if(futureCells.CONTAINS == 2) { // And if a future move contains a king
-                    GI.setCheckedPiece(futureCells.pieceColor); // Get the piece color of the checked king
-                    if(GI.getCheckedPiece() != GI.getTurnHandler().getCurrentPlayer().getPlayerColor()) { // If checked piece is of the next player
-                        GI.getTurnHandler().getNextPlayer().setCheck(true); // Change check status of next player to true
-                    } else { // else if the checked piece is of the current player
-                        GI.getTurnHandler().getCurrentPlayer().setCheck(true); // Change check status of current player to true
-                    }
-                    break;
-                }
-            } else {
-                futureCells.setBackground(Color.GREEN); // (FOR MAKING MOVE PURPOSES) set a cell to green
-                futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
-            }
+            if (checkOnAuto(futureCells)) break;
 
             if(futureCells.CONTAINS != 0) continue; // If a selected piece is any piece aside from a pawn and its suggested move that turned green has a piece of the next player, then proceed to other suggestions
+
+            if (chosenCell.CONTAINS == 2) {
+                KingCastlingCheck(chosenCell);
+            }
 
             // If a selected piece is a bishop, a rook, or a queen
             if(chosenCell.CONTAINS == 7 || chosenCell.CONTAINS == 8 || chosenCell.CONTAINS == 9) {
@@ -225,25 +290,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                     futureCells = calculateAvailMove(futureCells, currentColorPiece, i, moves);
                     if(futureCells == null) break;
 
-                    if(GI.isOnAuto())  {
-                        GI.getMoveList().add(futureCells);
-                    }
+                    if (checkOnAuto(futureCells)) break;
 
-                    if(!GI.isSuggesting()) {
-                        if(futureCells.CONTAINS == 2) {
-                            GI.setCheckedPiece(futureCells.pieceColor);;
-                            if(GI.getCheckedPiece() != GI.getTurnHandler().getCurrentPlayer().getPlayerColor()) {
-                                GI.getTurnHandler().getNextPlayer().setCheck(true);
-                            } else {
-                                GI.getTurnHandler().getCurrentPlayer().setCheck(true);
-                            }
-                            break;
-                        }
-                    } else {
-                        futureCells.setBackground(Color.GREEN);
-                        futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
-                    }
-                    
                     if(futureCells.CONTAINS != 0) break;
                 }
             } 
@@ -266,9 +314,9 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                     GI.getMoveList().add(futureCells);
                 }
 
-                if(!GI.isSuggesting()) {
+                if(GI.isSuggesting()) {
                     if(futureCells.CONTAINS == 2) { 
-                        GI.setCheckedPiece(futureCells.pieceColor);; 
+                        GI.setCheckedPiece(futureCells.pieceColor);
                         if(GI.getCheckedPiece() != GI.getTurnHandler().getCurrentPlayer().getPlayerColor()) {
                             GI.getTurnHandler().getNextPlayer().setCheck(true);
                         } else {
@@ -284,6 +332,28 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 }
             }
         }
+    }
+
+    private boolean checkOnAuto(Cells futureCells) {
+        if(GI.isOnAuto()) { // (FOR CHECKMATE PURPOSES) Add move to movelist after it is calculated
+            GI.getMoveList().add(futureCells);
+        }
+
+        if(GI.isSuggesting()) { // (FOR CHECKING PURPOSES)
+            if(futureCells.CONTAINS == 2) { // And if a future move contains a king
+                GI.setCheckedPiece(futureCells.pieceColor); // Get the piece color of the checked king
+                if(GI.getCheckedPiece() != GI.getTurnHandler().getCurrentPlayer().getPlayerColor()) { // If checked piece is of the next player
+                    GI.getTurnHandler().getNextPlayer().setCheck(true); // Change check status of next player to true
+                } else { // else if the checked piece is of the current player
+                    GI.getTurnHandler().getCurrentPlayer().setCheck(true); // Change check status of current player to true
+                }
+                return true;
+            }
+        } else {
+            futureCells.setBackground(Color.GREEN); // (FOR MAKING MOVE PURPOSES) set a cell to green
+            futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
+        }
+        return false;
     }
 
     // Calculate future moves for next turn and check if a move checks a king
@@ -339,7 +409,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
 
     public void isCheckmate(Cells[][] board) {
         boolean stalemated = checkForCheckmate();
-        if(stalemated == true) { // If the next player is checkmated
+        if(stalemated) { // If the next player is checkmated
             clock.timer.stop();
             
             // Disable all cells
@@ -368,7 +438,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
 
                 if(GI.getMoveList().isEmpty()) continue; // If a piece has no move, then proceed to other pieces
 
-                if(doMoves(cell) == false) { // If current player has more moves to disable check status
+                if(!doMoves(cell)) { // If current player has more moves to disable check status
                     GI.getTurnHandler().getCurrentPlayer().setCheck(true); // Set current player's check status to true
                     return false; // Return that the player is not checkmated
                 }
@@ -383,31 +453,11 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         Cells futureCells;
 
         for (int i = 0; i < GI.getMoveList().size(); i++) {
-            GI.setPrevChosenCell(cell);;
+            GI.setPrevChosenCell(cell);
             futureCells = GI.getMoveList().get(i);
 
-            if(futureCells.getIcon() != null) {
-                if(futureCells.pieceColor == 1) {
-                    GI.getBoard(GI.getPlayer1()).addToCapturedBoard(futureCells, GI.getCoordinates()[1], GI.getCoordinates()[0]);
-                    GI.getCoordinates()[1]++;
-                    if(GI.getCoordinates()[1] > 3) {
-                        GI.getCoordinates()[0]++;
-                        GI.getCoordinates()[1] = 0;
-                    } 
-                } else if(futureCells.pieceColor == -1) {
-                    GI.getBoard(GI.getPlayer2()).addToCapturedBoard(futureCells, GI.getCoordinates()[3], GI.getCoordinates()[2]);
-                    GI.getCoordinates()[3]++;
-                    if(GI.getCoordinates()[3] > 3) {
-                        GI.getCoordinates()[2]++;
-                        GI.getCoordinates()[3] = 0;
-                    }
-                }
-            }
+            moveHandler(futureCells);
 
-            // Store chosen cell piece properties for undo purposes
-            Cells selectedCell = new Cells(futureCells.CONTAINS, futureCells.pieceColor, futureCells.piece);
-            GI.getTurnHandler().getCurrentPlayer().addMove(selectedCell);
-            
             // Move the clicked piece to the chosen cell
             GI.getTurnHandler().getCurrentPlayer().addMove(changeCellProperties(futureCells));
 
@@ -445,7 +495,6 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         if(GI.getTurnHandler().getCurrentPlayer().getMove().isEmpty() && GI.getTurnHandler().getNextPlayer().getMove().isEmpty())
             return null;
 
-        resetAvailCells(GI.getCells());
         GI.setPrevChosenCell(null);
         GI.setAllowedToMove(false);
 
@@ -473,6 +522,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         calculateFutureMove();
         isCheck(GI.getTurnHandler().getCurrentPlayer());
 
+        resetAvailCells(GI.getCells());
         return currentCell.getIcon();
     }
 
