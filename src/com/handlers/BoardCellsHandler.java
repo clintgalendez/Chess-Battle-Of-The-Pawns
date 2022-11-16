@@ -168,10 +168,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 GI.getCells()[3][selectedMove.posY].CONTAINS = 8; // Change the cell at the right of the king to a rook
                 resetCellProperties(GI.getCells()[0][selectedMove.posY]); // Reset the cell at the left of the king
                 changePropertiesForCastling(selectedMove, 3); // Change the properties of the cell at the right of the king
-            } else if(selectedMove.posX == 6) { //If the king is moving to the right
-                GI.getCells()[5][selectedMove.posY].CONTAINS = 8; // Change the cell at the left of the king to a rook
+            } else if(selectedMove.posX == 5) { //If the king is moving to the right
+                GI.getCells()[4][selectedMove.posY].CONTAINS = 8; // Change the cell at the left of the king to a rook
                 resetCellProperties(GI.getCells()[7][selectedMove.posY]); // Reset the cell at the right of the king
-                changePropertiesForCastling(selectedMove, 5); // Change the properties of the cell at the left of the king
+                changePropertiesForCastling(selectedMove, 4); // Change the properties of the cell at the left of the king
             }
 
         } else { // For any piece aside from pawns
@@ -206,32 +206,34 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
     }
 
     public void doKingCastling(int rowToChange) {
+        boolean canCastleleft = true;
+        boolean canCastleRight = true;
         //check the row of the king if it is empty
         for (int i = 1; i < 4; i++) {
-            if (GI.getCells()[i][rowToChange].CONTAINS == 0) {
-                GI.setIsCastling(true);
-            } else {
-                GI.setIsCastling(false);
+            if (GI.getCells()[i][rowToChange].CONTAINS != 0) {
+                canCastleleft = false;
                 break;
             }
         }
 
-        if (GI.isCastling()) {
-            GI.getCells()[1][rowToChange].setBackground(Color.GREEN);
+        if (canCastleleft) {
+            GI.getCells()[2][rowToChange].setBackground(Color.GREEN);
         }
 
         //check the other side of the king if it is empty
         for (int i = 5; i < 7; i++) {
-            if (GI.getCells()[i][rowToChange].CONTAINS == 0) {
-                GI.setIsCastling(true);
-            } else {
-                GI.setIsCastling(false);
+            if (GI.getCells()[i][rowToChange].CONTAINS != 0) {
+                canCastleRight = false;
                 break;
             }
         }
 
-        if (GI.isCastling()) {
-            GI.getCells()[6][rowToChange].setBackground(Color.GREEN);
+        if (canCastleRight) {
+            GI.getCells()[5][rowToChange].setBackground(Color.GREEN);
+        }
+
+        if (canCastleleft || canCastleRight) {
+            GI.setIsCastling(true);
         }
     }
 
@@ -306,30 +308,12 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             moves = MoveSets.getAvailableMoves(piece);
             for(int i = 0; i < MoveSets.getAvailableMoves(piece).length; i++) {
                 futureCells = calculateAvailMove(chosenCell, currentColorPiece, i, moves);
-                if(futureCells == null) { 
+                assert futureCells != null;
+                if(futureCells.CONTAINS == 0) { //if cell is empty then continue
                     continue;
                 }
-    
-                if(GI.isOnAuto())  {
-                    GI.getMoveList().add(futureCells);
-                }
 
-                if(GI.isSuggesting()) {
-                    if(futureCells.CONTAINS == 2) { 
-                        GI.setCheckedPiece(futureCells.pieceColor);
-                        if(GI.getCheckedPiece() != GI.getTurnHandler().getCurrentPlayer().getPlayerColor()) {
-                            GI.getTurnHandler().getNextPlayer().setCheck(true);
-                        } else {
-                            GI.getTurnHandler().getCurrentPlayer().setCheck(true);
-                        }
-                        break;
-                    }
-                } else {
-                    if(futureCells.CONTAINS != 0) {
-                        futureCells.setBackground(Color.GREEN); // If a suggested move has a piece of the next player, then set a cell to green
-                        futureCells.setBorder(BorderFactory.createRaisedSoftBevelBorder());
-                    }
-                }
+                if (checkOnAuto(futureCells)) break;
             }
         }
     }
