@@ -28,9 +28,9 @@ public class SettingsUI extends JDialog {
     private ButtonSliders help;
     private ButtonSliders sounds;
 
-    private Clock clock;
+    private final Clock clock;
 
-    private GameUI GI;
+    private final GameUI GI;
 
     public SettingsUI(GameUI GI, Clock clock) {
         this.GI = GI;

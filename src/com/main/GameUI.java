@@ -2,6 +2,7 @@ package com.main;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -37,8 +38,6 @@ public class GameUI extends JLayeredPane {
     private final int WIDTH = 1280;
     private final int HEIGHT = 720;
 
-    private JLayeredPane layeredPane;
-
     private RoundPanel undoPanel;
     private RoundPanel homePanel;
     private RoundPanel settingsPanel;
@@ -49,14 +48,15 @@ public class GameUI extends JLayeredPane {
     private Board piecesBoardOne;
     private Board piecesBoardTwo;
 
-    private ArrayList<Cells> moveList = new ArrayList<>();
+    private final ArrayList<Cells> moveList = new ArrayList<>();
 
     private boolean gameStarted = false;
     private boolean allowedToMove = false;
     private boolean isSuggesting = false;
     private boolean onAuto = false;
+    private boolean isCastling = false;
 
-    private int[] coordinates = {0, 0, 0, 0};
+    private final int[] coordinates = {0, 0, 0, 0};
     private int checkedPiece;
 
     private Cells prevChosenCell;
@@ -68,9 +68,9 @@ public class GameUI extends JLayeredPane {
 
     private BoardCellsHandler bch;
 
-    private JFrame GameWindow;
+    private final JFrame GameWindow;
 
-    private Clock clock = new Clock();;
+    private final Clock clock = new Clock();
 
     public GameUI(JFrame GameWindow) {
         this.GameWindow = GameWindow;
@@ -267,8 +267,7 @@ public class GameUI extends JLayeredPane {
             }
         }
 
-        for(int i = 0; i < coordinates.length; i++)
-            coordinates[i] = 0;
+        Arrays.fill(coordinates, 0);
         
         namePanelOne.setBackground(CAMEO);
         namePanelTwo.setBackground(CAMEO);
@@ -323,10 +322,6 @@ public class GameUI extends JLayeredPane {
         return cells;
     }
 
-    public JLayeredPane getLayeredPane() {
-        return layeredPane;
-    }
-
     public ArrayList<Cells> getMoveList() {
         return moveList;
     }
@@ -348,7 +343,7 @@ public class GameUI extends JLayeredPane {
     }
 
     public boolean isSuggesting() {
-        return isSuggesting;
+        return !isSuggesting;
     }
 
     public void setSuggesting(boolean isSuggesting) {
@@ -357,6 +352,14 @@ public class GameUI extends JLayeredPane {
 
     public boolean isOnAuto() {
         return onAuto;
+    }
+
+    public boolean isCastling() {
+        return isCastling;
+    }
+
+    public void setIsCastling(boolean isCastling) {
+        this.isCastling = isCastling;
     }
 
     public void setOnAuto(boolean onAuto) {
@@ -397,5 +400,8 @@ public class GameUI extends JLayeredPane {
 
     public void setBCH(BoardCellsHandler bch) {
         this.bch = bch;
+    }
+
+    public void setLayeredPane(JLayeredPane layeredPane) {
     }
 }
