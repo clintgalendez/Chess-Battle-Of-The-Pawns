@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Stack;
 
+import javax.swing.border.LineBorder;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -304,8 +305,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 if(((j % 2 == 1) && (i % 2 == 1))
                         || ((j % 2 == 0) && (i % 2 == 0))) {
                     board[j][i].setBackground(new Color(224, 190, 145));
+                    board[j][i].setBorder(new LineBorder(null, 1, false));
                 } else {
                     board[j][i].setBackground(new Color(47, 38, 29));
+                    board[j][i].setBorder(new LineBorder(null, 1, false));
                 }
             }
         }
