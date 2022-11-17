@@ -2,12 +2,11 @@ package com.main;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JLayeredPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -16,6 +15,7 @@ import com.gui_components.Board;
 import com.gui_components.BoardLabel;
 import com.gui_components.Chessboard;
 import com.gui_components.Clock;
+import com.gui_components.FadingComponent;
 import com.gui_components.NamePanel;
 import com.gui_components.RoundPanel;
 import com.handlers.BoardCellsHandler;
@@ -27,7 +27,7 @@ import com.loaders.GraphicsLoader;
 import com.mechanics.Cells;
 import com.mechanics.Players;
 
-public class GameUI extends JLayeredPane {
+public class Play extends FadingComponent {
     private static final Color CALICO = new Color(224, 190, 145);
     private static final Color ZEUS = new Color(47, 38, 29);
     private static final Color CAMEO = new Color(214, 188, 153);
@@ -36,8 +36,6 @@ public class GameUI extends JLayeredPane {
 
     private final int WIDTH = 1280;
     private final int HEIGHT = 720;
-
-    private JLayeredPane layeredPane;
 
     private RoundPanel undoPanel;
     private RoundPanel homePanel;
@@ -49,14 +47,15 @@ public class GameUI extends JLayeredPane {
     private Board piecesBoardOne;
     private Board piecesBoardTwo;
 
-    private ArrayList<Cells> moveList = new ArrayList<>();
+    private final ArrayList<Cells> moveList = new ArrayList<>();
 
     private boolean gameStarted = false;
     private boolean allowedToMove = false;
     private boolean isSuggesting = false;
     private boolean onAuto = false;
+    private boolean isCastling = false;
 
-    private int[] coordinates = {0, 0, 0, 0};
+    private final int[] coordinates = {0, 0, 0, 0};
     private int checkedPiece;
 
     private Cells prevChosenCell;
@@ -66,20 +65,21 @@ public class GameUI extends JLayeredPane {
 
     private TurnBasedHandler turnHandler;
 
+    private SettingsDialog settingsDialog;
+
     private BoardCellsHandler bch;
 
-    private JFrame GameWindow;
+    private final GameWindow gameWindow;
 
-    private Clock clock = new Clock();;
+    private final Clock clock = new Clock();
 
-    public GameUI(JFrame GameWindow) {
-        this.GameWindow = GameWindow;
+    public Play(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
 
         setSize(WIDTH, HEIGHT);
 
         init();
         arrangeBoard();
-        play();
     }
 
     public void init() {
@@ -99,7 +99,7 @@ public class GameUI extends JLayeredPane {
         mainPanel.setOpaque(false);
         mainPanel.setSize(WIDTH, HEIGHT);
 
-        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, this, clock);
+        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, gameWindow);
         chessboard.setBounds(320, 50, 625, 625);
 
         piecesBoardOne = new Board(ZEUS, CALICO);
@@ -122,25 +122,25 @@ public class GameUI extends JLayeredPane {
 
         clock.setBounds(595,10,90,30);
         
-        SettingsUI SI = new SettingsUI(this, clock);
+        settingsDialog = new SettingsDialog(gameWindow);
 
         JLabel undo = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Undo.png", 60, 60)));
         undo.setSize(60, 60);
-        undoPanel = new RoundPanel(CAMEO, 10, new UndoHandler(bch, this));
+        undoPanel = new RoundPanel(CAMEO, 10, new UndoHandler(bch, gameWindow));
         undoPanel.setBounds(18,600,60,60);
         undoPanel.add(undo);
 
         JLabel home = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Home.png", 60, 60)));
         home.setSize(60, 60);
 
-        homePanel = new RoundPanel(CAMEO, 10,  new HomeHandler(this));
+        homePanel = new RoundPanel(CAMEO, 10,  new HomeHandler(gameWindow));
         homePanel.setBounds(1184,600,60,60);
         homePanel.add(home);
 
         JLabel settings = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/Settings.png", 60, 60)));
         settings.setSize(60, 60);
         
-        settingsPanel = new RoundPanel(CAMEO, 10, new SettingsHandler(this, SI, GameWindow, clock));
+        settingsPanel = new RoundPanel(CAMEO, 10, new SettingsHandler(gameWindow));
         settingsPanel.setBounds(1184,530,60,60);
         settingsPanel.add(settings);
 
@@ -158,16 +158,28 @@ public class GameUI extends JLayeredPane {
 
         add(gameBackground, Integer.valueOf(0));
         add(mainPanel, Integer.valueOf(1));
-
-        clock.timer.start();
     }
 
-    public void play() {
+    public void play(String player1name, String player2name) {
+        if(player1name.isEmpty()) namePanelOne.setPlayerName("Player 1");
+        else namePanelOne.setPlayerName(player1name);
+
+        if(player2name.isEmpty()) namePanelTwo.setPlayerName("Player 2");
+        else namePanelTwo.setPlayerName(player2name);
+
         // Flow of the Program 
-        player1 = new Players("Player 1", -1); // Create Player 1
-        player2 = new Players("Player 2", 1); // Create Player 2
+        player1 = new Players(player1name, -1); // Create Player 1
+        player2 = new Players(player2name, 1); // Create Player 2
         turnHandler = new TurnBasedHandler(player1, player2, this); // Create Turn Handler
+
+        for(Cells[] boardCells : cells) {
+            for(Cells boardCell : boardCells) {
+                boardCell.setEnabled(true);
+            }
+        }
+
         gameStarted = true;
+        clock.timer.start();
     }
 
     public void arrangeBoard() {
@@ -267,8 +279,7 @@ public class GameUI extends JLayeredPane {
             }
         }
 
-        for(int i = 0; i < coordinates.length; i++)
-            coordinates[i] = 0;
+        Arrays.fill(coordinates, 0);
         
         namePanelOne.setBackground(CAMEO);
         namePanelTwo.setBackground(CAMEO);
@@ -288,7 +299,7 @@ public class GameUI extends JLayeredPane {
         clock.timer.start();
 
         arrangeBoard();
-        play();
+        play(player1.getPlayerName(), player2.getPlayerName());
     }
 
     public NamePanel getNamePanel(Players player) {
@@ -323,10 +334,6 @@ public class GameUI extends JLayeredPane {
         return cells;
     }
 
-    public JLayeredPane getLayeredPane() {
-        return layeredPane;
-    }
-
     public ArrayList<Cells> getMoveList() {
         return moveList;
     }
@@ -353,6 +360,14 @@ public class GameUI extends JLayeredPane {
 
     public void setSuggesting(boolean isSuggesting) {
         this.isSuggesting = isSuggesting;
+    }
+
+    public boolean isCastling() {
+        return isCastling;
+    }
+
+    public void setIsCastling(boolean isCastling) {
+        this.isCastling = isCastling;
     }
 
     public boolean isOnAuto() {
@@ -397,5 +412,13 @@ public class GameUI extends JLayeredPane {
 
     public void setBCH(BoardCellsHandler bch) {
         this.bch = bch;
+    }
+
+    public SettingsDialog getSettingsDialog() {
+        return settingsDialog;
+    }
+
+    public Clock getClock() {
+        return clock;
     }
 }

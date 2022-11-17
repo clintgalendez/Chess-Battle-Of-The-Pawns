@@ -3,76 +3,76 @@ package com.handlers;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import com.main.SettingsUI;
+import com.main.GameWindow;
 
 public class SettingsMenuHandler implements MouseListener {
-    private SettingsUI SI;
+    final GameWindow gameWindow;
 
-    public SettingsMenuHandler(SettingsUI SI) {
-        this.SI = SI;
+    public SettingsMenuHandler(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
     }
     @Override
     public void mouseClicked(MouseEvent e) {
-        if(e.getSource() == SI.getResume()) {
-            SI.getResume().setUpdate(true);
-            SI.getResume().repaint();
-        } else if (e.getSource() == SI.getRestart()) {
-            SI.getRestart().setUpdate(true);
-            SI.getRestart().repaint();
-        } else if(e.getSource() == SI.getHelp()) {
-            SI.getHelp().setUpdate(true);
-            SI.getHelp().repaint();
-        } else if(e.getSource() == SI.getSounds()) {
-            SI.getSounds().setUpdate(true);
-            SI.getSounds().repaint();
+        if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getResume()) {
+            gameWindow.getPlay().getSettingsDialog().getResume().setUpdate(true);
+            gameWindow.getPlay().getSettingsDialog().getResume().repaint();
+        } else if (e.getSource() == gameWindow.getPlay().getSettingsDialog().getRestart()) {
+            gameWindow.getPlay().getSettingsDialog().getRestart().setUpdate(true);
+            gameWindow.getPlay().getSettingsDialog().getRestart().repaint();
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getHelp()) {
+            gameWindow.getPlay().getSettingsDialog().getHelp().setUpdate(true);
+            gameWindow.getPlay().getSettingsDialog().getHelp().repaint();
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getSounds()) {
+            gameWindow.getPlay().getSettingsDialog().getSounds().setUpdate(true);
+            gameWindow.getPlay().getSettingsDialog().getSounds().repaint();
         }
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if(e.getSource() == SI.getResume()) {
+        if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getResume()) {
 
-        } else if (e.getSource() == SI.getRestart()) {
+        } else if (e.getSource() == gameWindow.getPlay().getSettingsDialog().getRestart()) {
 
-        } else if(e.getSource() == SI.getHelp()) {
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getHelp()) {
             
-        } else if(e.getSource() == SI.getSounds());
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getSounds());
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if(e.getSource() == SI.getResume()) {
+        if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getResume()) {
             
 
-        } else if (e.getSource() == SI.getRestart()) {
+        } else if (e.getSource() == gameWindow.getPlay().getSettingsDialog().getRestart()) {
 
-        } else if(e.getSource() == SI.getHelp()) {
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getHelp()) {
             
-        } else if(e.getSource() == SI.getSounds());
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getSounds());
         
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        if(e.getSource() == SI.getResume()) {
+        if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getResume()) {
 
-        } else if (e.getSource() == SI.getRestart()) {
+        } else if (e.getSource() == gameWindow.getPlay().getSettingsDialog().getRestart()) {
 
-        } else if(e.getSource() == SI.getHelp()) {
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getHelp()) {
             
-        } else if(e.getSource() == SI.getSounds());
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getSounds());
         
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        if(e.getSource() == SI.getResume()) {
+        if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getResume()) {
 
-        } else if (e.getSource() == SI.getRestart()) {
+        } else if (e.getSource() == gameWindow.getPlay().getSettingsDialog().getRestart()) {
 
-        } else if(e.getSource() == SI.getHelp()) {
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getHelp()) {
             
-        } else if(e.getSource() == SI.getSounds());
+        } else if(e.getSource() == gameWindow.getPlay().getSettingsDialog().getSounds());
         
     }
     

@@ -13,7 +13,7 @@ import javax.swing.border.BevelBorder;
 import javax.swing.border.LineBorder;
 
 import com.handlers.BoardCellsHandler;
-import com.main.GameUI;
+import com.main.GameWindow;
 import com.mechanics.Cells;
 
 import javax.swing.BorderFactory;
@@ -23,9 +23,11 @@ import javax.swing.SwingConstants;
 
 public class Chessboard extends JPanel {
 
-    public Chessboard(Cells[][] cells, Color color_one, Color color_two, GameUI GI, Clock clock) {
-        BoardCellsHandler bch = new BoardCellsHandler(GI, clock);
-        GI.setBCH(bch);
+    final GameWindow gameWindow;
+
+    public Chessboard(Cells[][] cells, Color color_one, Color color_two, GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
+
         setLayout(new GridBagLayout());
         setBackground(new Color(49,42,33));
         setBorder(new LineBorder(color_one, 2));
@@ -66,7 +68,7 @@ public class Chessboard extends JPanel {
         add(bottomleft, gbc);
 
         // Initialize the cells of the chessboard
-        initChessBoardCells(cells, 8, true, color_one, color_two, null, bch);
+        initChessBoardCells(cells, 8, color_one, color_two, null);
 
         JPanel board = new JPanel(new GridLayout(0,8));
         board.setBorder(new LineBorder(color_one, 2));
@@ -94,17 +96,17 @@ public class Chessboard extends JPanel {
     }
 
     // Initialize chessboard cells
-    private void initChessBoardCells(Cells[][] cells, int dimension, boolean isEnabled, Color color1, Color color2, Color color3, BoardCellsHandler bch) {
+    private void initChessBoardCells(Cells[][] cells, int dimension, Color color1, Color color2, Color color3) {
         Insets buttonMargin = new Insets(0, 0, 0, 0);
 
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 Cells cell = new Cells(j, i, 0, 0,null);
                 cell.setMargin(buttonMargin);
-                cell.setEnabled(isEnabled);
+                cell.setEnabled(false);
                 cell.setFocusable(false);
                 cell.setBorder(new LineBorder(color3, 1, false));
-                cell.addActionListener(bch);
+                cell.addActionListener(new BoardCellsHandler(gameWindow));
 
                 cell.addMouseListener(new MouseListener() {
 

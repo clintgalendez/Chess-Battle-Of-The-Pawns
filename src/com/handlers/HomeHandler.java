@@ -4,42 +4,43 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-import com.main.GameUI;
+import com.main.GameWindow;
 
 public class HomeHandler implements MouseListener {
-    GameUI GI;
+    private final GameWindow gameWindow;
 
-    public HomeHandler(GameUI GI) {
-        this.GI = GI;
+    public HomeHandler(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
     }
     @Override
     public void mouseClicked(MouseEvent e) {
-        // TODO Auto-generated method stub
-        
+        gameWindow.getPlay().fadeOut();
+
+        gameWindow.getContentPane().remove(gameWindow.getPlay());
+        gameWindow.restartGame();
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        GI.getHomePanel().setBackground(new Color(47, 38, 29));
+        gameWindow.getPlay().getHomePanel().setBackground(new Color(47, 38, 29));
         
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        GI.getHomePanel().setBackground(new Color(71, 64, 55));
+        gameWindow.getPlay().getHomePanel().setBackground(new Color(71, 64, 55));
         
     }
 
     @Override
     public void mouseEntered(MouseEvent e) {
-        GI.getHomePanel().setBackground(new Color(71, 64, 55));
+        gameWindow.getPlay().getHomePanel().setBackground(new Color(71, 64, 55));
         
     }
 
     @Override
     public void mouseExited(MouseEvent e) {
-        GI.getHomePanel().setBackground(new Color(214,188,153));
+        gameWindow.getPlay().getHomePanel().setBackground(new Color(214,188,153));
         
     }
-    
 }

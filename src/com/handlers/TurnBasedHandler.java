@@ -4,18 +4,18 @@ package com.handlers;
 
 import java.awt.Color;
 
-import com.main.GameUI;
+import com.main.Play;
 import com.mechanics.Players;
 
 public class TurnBasedHandler {
     private Players currentPlayer;
     private Players nextPlayer;
 
-    public TurnBasedHandler(Players player1, Players player2, GameUI userInterface) {
+    public TurnBasedHandler(Players player1, Players player2, Play newGame) {
         currentPlayer = player1;
         nextPlayer = player2;
 
-        userInterface.getNamePanel(currentPlayer).setBackground(Color.GREEN);
+        newGame.getNamePanel(currentPlayer).setBackground(Color.GREEN);
     }
 
     public void nextTurn() {

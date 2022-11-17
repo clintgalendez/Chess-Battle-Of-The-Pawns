@@ -12,12 +12,11 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import com.gui_components.ButtonSliders;
-import com.gui_components.Clock;
 import com.gui_components.RoundPanel;
 import com.handlers.SettingsMenuHandler;
 import com.loaders.GraphicsLoader;
 
-public class SettingsUI extends JDialog {
+public class SettingsDialog extends JDialog {
     private JLayeredPane layeredPane;
 
     private static final Color CALICO = new Color(224, 190, 145);
@@ -28,13 +27,10 @@ public class SettingsUI extends JDialog {
     private ButtonSliders help;
     private ButtonSliders sounds;
 
-    private Clock clock;
+    private final GameWindow gameWindow;
 
-    private GameUI GI;
-
-    public SettingsUI(GameUI GI, Clock clock) {
-        this.GI = GI;
-        this.clock = clock;
+    public SettingsDialog(GameWindow gameWindow) {
+        this.gameWindow = gameWindow;
 
         init();
 
@@ -51,7 +47,7 @@ public class SettingsUI extends JDialog {
         setVisible(false);
     }
 
-    public void init() {
+    private void init() {
         layeredPane = new JLayeredPane();
         layeredPane.setSize(590, 584);
 
@@ -66,7 +62,7 @@ public class SettingsUI extends JDialog {
         JLabel settingsBackground = new JLabel(new ImageIcon(GraphicsLoader.loadImage("resources/MenuBackground.png", 580, 574)));
         settingsBackground.setBounds(8, 8, 574, 566);
 
-        resume = new ButtonSliders(new SettingsMenuHandler(this), "resources/Pause.png", "resources/Resume.png", this, GI, clock, 1);
+        resume = new ButtonSliders(new SettingsMenuHandler(gameWindow), "resources/Pause.png", "resources/Resume.png", gameWindow, 1);
         resume.setBounds(0, 0, 420, 91);
 
         JLabel resumeLabel = new JLabel("RESUME");
@@ -80,7 +76,7 @@ public class SettingsUI extends JDialog {
         resumePanel.add(resumeLabel);
         resumePanel.add(resume);
 
-        restart = new ButtonSliders(new SettingsMenuHandler(this), "resources/Restart1.png", "resources/Restart2.png", this, GI, clock, 2);
+        restart = new ButtonSliders(new SettingsMenuHandler(gameWindow), "resources/Restart1.png", "resources/Restart2.png", gameWindow, 2);
         restart.setBounds(0, 0, 420, 91);
         
         JLabel restartLabel = new JLabel("RESTART");
@@ -94,7 +90,7 @@ public class SettingsUI extends JDialog {
         restartPanel.add(restart);
         restartPanel.add(restartLabel);
 
-        help = new ButtonSliders(new SettingsMenuHandler(this), "resources/Help1.png", "resources/Help2.png", this, GI, clock, 3);
+        help = new ButtonSliders(new SettingsMenuHandler(gameWindow), "resources/Help1.png", "resources/Help2.png", gameWindow, 3);
         help.setBounds(0, 0, 420, 91);
 
         JLabel helpLabel = new JLabel("HELP");
@@ -108,7 +104,7 @@ public class SettingsUI extends JDialog {
         helpPanel.add(help);
         helpPanel.add(helpLabel);
 
-        sounds = new ButtonSliders(new SettingsMenuHandler(this), "resources/Sounds1.png", "resources/Sounds2.png", this, GI, clock, 4);
+        sounds = new ButtonSliders(new SettingsMenuHandler(gameWindow), "resources/Sounds1.png", "resources/Sounds2.png", gameWindow, 4);
         sounds.setBounds(0, 0, 420, 91);
 
         JLabel soundsLabel = new JLabel("SOUNDS");
