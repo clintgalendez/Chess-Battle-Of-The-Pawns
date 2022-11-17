@@ -99,7 +99,7 @@ public class Play extends FadingComponent {
         mainPanel.setOpaque(false);
         mainPanel.setSize(WIDTH, HEIGHT);
 
-        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, gameWindow);
+        Chessboard chessboard = new Chessboard(cells, CALICO, ZEUS, this, gameWindow);
         chessboard.setBounds(320, 50, 625, 625);
 
         piecesBoardOne = new Board(ZEUS, CALICO);

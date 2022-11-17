@@ -17,7 +17,7 @@ public class SettingsHandler implements MouseListener {
     public void mouseClicked(MouseEvent e) {
         gameWindow.getPlay().getClock().timer.stop();
         gameWindow.getRootPane().getGlassPane().setVisible(true);
-            gameWindow.getPlay().getSettingsPanel().setVisible(true);
+            gameWindow.getPlay().getSettingsDialog().setVisible(true);
 
         gameWindow.getRootPane().getGlassPane().setVisible(false);
     }
