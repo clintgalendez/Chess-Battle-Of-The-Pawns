@@ -13,7 +13,7 @@ public class Players {
     private boolean isCheck = false;
     private boolean isDraw = false;
     private boolean hasCastled = false;
-    private boolean hasMoved = false;
+    private boolean hasStored = false;
     private final boolean isCheckMate = false;
 
     public Players(String name, int color) {
@@ -58,12 +58,12 @@ public class Players {
         return hasCastled;
     }
 
-    public boolean hasMoved() {
-        return hasMoved;
+    public boolean hasStored() {
+        return hasStored;
     }
 
-    public void setHasMoved(boolean hasMoved) {
-        this.hasMoved = hasMoved;
+    public void setHasStored(boolean hasStored) {
+        this.hasStored = hasStored;
     }
 
     public boolean isCheckMate() {

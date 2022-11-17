@@ -18,6 +18,11 @@ import com.mechanics.MoveSets;
 import com.mechanics.Players;
 
 public class BoardCellsHandler implements Mechanics, ActionListener {
+    Cells rookDesignatedCell;
+    Cells rookAfterPositioned;
+    Cells rookBeforePositioned;
+    Cells rookAfterLeavingInitPos;
+
     private final GameWindow gameWindow;
     
     public BoardCellsHandler(GameWindow gameWindow) {
@@ -65,9 +70,22 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             Cells prevSelectedCell = new Cells(gameWindow.getPlay().getPrevChosenCell().CONTAINS, gameWindow.getPlay().getPrevChosenCell().pieceColor, gameWindow.getPlay().getPrevChosenCell().piece);
             gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(prevSelectedCell);
 
-            // Reset the previously clicked cell and store its properties for undo purposes
-            resetCellProperties(gameWindow.getPlay().getPrevChosenCell());
             gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(gameWindow.getPlay().getPrevChosenCell());
+
+            if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasCastled() && !gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasStored()) {
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookDesignatedCell);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookAfterPositioned);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookBeforePositioned);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookAfterLeavingInitPos);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasStored(true);
+
+                rookDesignatedCell = null;
+                rookAfterPositioned = null;
+                rookBeforePositioned = null;
+                rookAfterLeavingInitPos = null;
+            }
+
+            resetCellProperties(gameWindow.getPlay().getPrevChosenCell());
 
             gameWindow.getPlay().setIsCastling(false);
             gameWindow.getPlay().setSuggesting(false);
@@ -143,14 +161,34 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
 
             //Move the Rook
             if(selectedMove.posX == 2) { //If the king is moving to the left
-                gameWindow.getPlay().getCells()[3][selectedMove.posY].CONTAINS = 8; // Change the cell at the right of the king to a rook
+                rookDesignatedCell = new Cells(gameWindow.getPlay().getCells()[3][selectedMove.posY].CONTAINS, 
+                                               gameWindow.getPlay().getCells()[3][selectedMove.posY].pieceColor, 
+                                               gameWindow.getPlay().getCells()[3][selectedMove.posY].piece);
+
+                rookAfterPositioned = changePropertiesForCastling(selectedMove, 3); // Change the properties of the cell at the right of the king
+                
+                rookBeforePositioned = new Cells(gameWindow.getPlay().getCells()[0][selectedMove.posY].CONTAINS, 
+                                                 gameWindow.getPlay().getCells()[0][selectedMove.posY].pieceColor,
+                                                 gameWindow.getPlay().getCells()[0][selectedMove.posY].piece);
+
+                rookAfterLeavingInitPos = gameWindow.getPlay().getCells()[0][selectedMove.posY];
                 resetCellProperties(gameWindow.getPlay().getCells()[0][selectedMove.posY]); // Reset the cell at the left of the king
-                changePropertiesForCastling(selectedMove, 3); // Change the properties of the cell at the right of the king
             } else if(selectedMove.posX == 6) { //If the king is moving to the right
-                gameWindow.getPlay().getCells()[5][selectedMove.posY].CONTAINS = 8; // Change the cell at the left of the king to a rook
+                rookDesignatedCell = new Cells(gameWindow.getPlay().getCells()[5][selectedMove.posY].CONTAINS, 
+                                               gameWindow.getPlay().getCells()[5][selectedMove.posY].pieceColor, 
+                                               gameWindow.getPlay().getCells()[5][selectedMove.posY].piece);
+                                               
+                rookAfterPositioned = changePropertiesForCastling(selectedMove, 5); // Change the properties of the cell at the left of the king
+                
+                rookBeforePositioned = new Cells(gameWindow.getPlay().getCells()[7][selectedMove.posY].CONTAINS, 
+                                                 gameWindow.getPlay().getCells()[7][selectedMove.posY].pieceColor,
+                                                 gameWindow.getPlay().getCells()[7][selectedMove.posY].piece);
+
+                rookAfterLeavingInitPos = gameWindow.getPlay().getCells()[7][selectedMove.posY];
                 resetCellProperties(gameWindow.getPlay().getCells()[7][selectedMove.posY]); // Reset the cell at the right of the king
-                changePropertiesForCastling(selectedMove, 5); // Change the properties of the cell at the left of the king
             }
+
+            gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasCastled(true);
         } else { // For any piece aside from pawns
             selectedMove.CONTAINS = gameWindow.getPlay().getPrevChosenCell().CONTAINS; // The newly clicked cell will contain the piece of the previous cell
             selectedMove.setIcon(gameWindow.getPlay().getPrevChosenCell().getIcon()); // The newly clicked cell will have the icon piece of the previous cell
@@ -169,7 +207,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         cells.piece = cells.getIcon();
     }
 
-    public void changePropertiesForCastling(Cells selectedMove, int rookX) {
+    public Cells changePropertiesForCastling(Cells selectedMove, int rookX) {
+        gameWindow.getPlay().getCells()[rookX][selectedMove.posY].CONTAINS = 8;
         if (gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getPlayerColor() == -1) {
             gameWindow.getPlay().getCells()[rookX][selectedMove.posY].setIcon(new ImageIcon(GraphicsLoader.loadImage("resources/WhiteRook.png",55,55)));
         } else {
@@ -178,6 +217,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
 
         gameWindow.getPlay().getCells()[rookX][selectedMove.posY].pieceColor = gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getPlayerColor();
         gameWindow.getPlay().getCells()[rookX][selectedMove.posY].piece = gameWindow.getPlay().getCells()[3][selectedMove.posY].getIcon();
+        
+        return gameWindow.getPlay().getCells()[rookX][selectedMove.posY];
     }
     
     public void doKingCastling(int rowToChange) {
@@ -495,6 +536,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().isEmpty() && gameWindow.getPlay().getTurnHandler().getNextPlayer().getMove().isEmpty())
             return null;
 
+        rookDesignatedCell = null;
+        rookAfterPositioned = null;
+        rookBeforePositioned = null;
+        rookAfterLeavingInitPos = null;
         gameWindow.getPlay().setPrevChosenCell(null);
         gameWindow.getPlay().setAllowedToMove(false);
 
@@ -523,6 +568,15 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         isCheck(gameWindow.getPlay().getTurnHandler().getCurrentPlayer());
 
         resetAvailCells(gameWindow.getPlay().getCells());
+
+        if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasCastled()) {
+            gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasCastled(false);
+            gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasStored(false);
+
+            gameWindow.getPlay().getTurnHandler().nextTurn();
+            undo();
+        }
+
         return currentCell.getIcon();
     }
 
