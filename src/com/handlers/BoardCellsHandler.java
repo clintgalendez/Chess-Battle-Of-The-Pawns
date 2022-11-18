@@ -77,13 +77,18 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookAfterPositioned);
                 gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookBeforePositioned);
                 gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(rookAfterLeavingInitPos);
-                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasStored(true);
 
-                rookDesignatedCell = null;
-                rookAfterPositioned = null;
-                rookBeforePositioned = null;
-                rookAfterLeavingInitPos = null;
+                Cells checkCell = new Cells(0, 2, null);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().addMove(checkCell);
+
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasStored(true);
+                gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasCastled(false);
             }
+
+            Cells sample = gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().peek();
+            System.out.println(sample.CONTAINS + " " + sample.pieceColor + " " + sample.piece);
+
+            System.out.println(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasStored() + " " + gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasCastled());
 
             resetCellProperties(gameWindow.getPlay().getPrevChosenCell());
 
@@ -536,16 +541,17 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().isEmpty() && gameWindow.getPlay().getTurnHandler().getNextPlayer().getMove().isEmpty())
             return null;
 
-        rookDesignatedCell = null;
-        rookAfterPositioned = null;
-        rookBeforePositioned = null;
-        rookAfterLeavingInitPos = null;
         gameWindow.getPlay().setPrevChosenCell(null);
         gameWindow.getPlay().setAllowedToMove(false);
 
         gameWindow.getPlay().getTurnHandler().nextTurn();
         Stack<Cells> prevMoves = gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove();
 
+        if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().peek().pieceColor == 2) {
+            gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().pop();
+            gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasCastled(true);
+        }
+        
         Cells prevCell = prevMoves.pop(); // The state of the cell of the selected piece after moving
         Cells prevSelectedCell = prevMoves.pop(); // The previous state of the selected piece
         Cells currentCell = prevMoves.pop(); // The state of the selected cell after moving
@@ -575,6 +581,10 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
 
             gameWindow.getPlay().getTurnHandler().nextTurn();
             undo();
+        }
+
+        if(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasCastled()) {
+
         }
 
         return currentCell.getIcon();
