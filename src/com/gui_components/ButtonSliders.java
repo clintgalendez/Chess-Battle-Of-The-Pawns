@@ -7,19 +7,14 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
 import com.loaders.GraphicsLoader;
-import com.main.GameUI;
-import com.main.HelpUI;
-import com.main.SettingsUI;
+import com.main.GameWindow;
+import com.main.HelpDialog;
 
 
 public class ButtonSliders extends JLabel {
 
     private String path_one;
     private String path_two;
-
-    private SettingsUI SI;
-    private GameUI GI;
-    private Clock clock;
 
     private int buttonNumber;
     private int frames = 0;
@@ -34,12 +29,12 @@ public class ButtonSliders extends JLabel {
 
     private ImageIcon icon;
 
-    public ButtonSliders(MouseListener l, String path_one, String path_two, SettingsUI SI, GameUI GI, Clock clock, int buttonNumber) {
+    private final GameWindow gameWindow;
+
+    public ButtonSliders(MouseListener l, String path_one, String path_two, GameWindow gameWindow, int buttonNumber) {
         this.path_one = path_one;
         this.path_two = path_two;
-        this.SI = SI;
-        this.GI = GI;
-        this.clock = clock;
+        this.gameWindow = gameWindow;
         this.buttonNumber = buttonNumber;
 
         addMouseListener(l);
@@ -62,20 +57,22 @@ public class ButtonSliders extends JLabel {
             icon = new ImageIcon(GraphicsLoader.loadImage(path_two, 65, 65));
             icon.paintIcon(this, g, (int)deltaX, 9); 
             update = false; reverse = true;
-            
             if(buttonNumber == 1) {
                 deltaX = 10;
-                clock.timer.restart();
-                SI.dispose();
+                gameWindow.getPlay().getClock().timer.restart();
+                gameWindow.getPlay().getSettingsDialog().dispose();
             } else if(buttonNumber == 2) {
                 deltaX = 10;
-                GI.restart();
-                SI.dispose();
+                gameWindow.getPlay().restart();
+                gameWindow.getPlay().getSettingsDialog().dispose();
             } else if(buttonNumber == 3) {
                 update = true;
                 repaint();
-                new HelpUI();
+                new HelpDialog();
             }
+        } else if(deltaX >= 300) {
+            icon = new ImageIcon(GraphicsLoader.loadImage(path_two, 65, 65));
+            icon.paintIcon(this, g, (int)deltaX, 9); 
         } else {
             icon = new ImageIcon(GraphicsLoader.loadImage(path_one, 65, 65));
             icon.paintIcon(this, g, (int)deltaX, 9);
