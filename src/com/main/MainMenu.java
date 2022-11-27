@@ -16,13 +16,13 @@ import com.gui_components.RotateImageObject;
 import com.gui_components.SideToSideImageObject;
 import com.loaders.GraphicsLoader;
 
-public class Game extends FadingComponent {
+public class MainMenu extends FadingComponent {
     private final int WIDTH = 1280;
     private final int HEIGHT = 720;
 
     private final GameWindow gameWindow;
 
-    public Game(GameWindow gameWindow) {
+    public MainMenu(GameWindow gameWindow) {
         this.gameWindow = gameWindow;
 
         setSize(WIDTH, HEIGHT);
@@ -144,6 +144,7 @@ public class Game extends FadingComponent {
         exit.setForeground(Color.WHITE);
         exit.setBounds(760, 380, 100, 35);
 
+        
         menuPanel.add(title);
         menuPanel.add(play);
         menuPanel.add(exit);
@@ -151,6 +152,7 @@ public class Game extends FadingComponent {
         menuPanel.add(pawn);
         menuPanel.add(queen);
         menuPanel.add(king);
+
 
         add(menuBackground, Integer.valueOf(0));
         add(menuPanel, Integer.valueOf(1));

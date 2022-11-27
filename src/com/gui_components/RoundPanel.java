@@ -43,5 +43,3 @@ public class RoundPanel extends JPanel {
         graphics.setColor(getForeground());
     }   
 }
-
-

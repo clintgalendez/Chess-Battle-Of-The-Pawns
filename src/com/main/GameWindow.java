@@ -4,23 +4,26 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import com.loaders.GraphicsLoader;
+import com.loaders.ResourceLoader;
+import com.loaders.SoundLoader;
 
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.GraphicsEnvironment;
 import java.awt.Point;
 
-public class GameWindow extends JFrame {
+public class GameWindow extends JFrame  {
     Play newGame;
-    Game masterchess;
+    MainMenu masterchess;
+    SoundLoader bgMusic = new SoundLoader(ResourceLoader.load("sounds/MenuBackgroundMusic.wav"));
     
     public static void main(String[] args) {
         new GameWindow(1280, 720, "Masterchess: Battle of the Pawns");
     }
 
     GameWindow(int width, int height, String title) {
-        newGame = new Play(this);
-        masterchess = new Game(this);
+        newGame = new Play(this, bgMusic);
+        masterchess = new MainMenu(this);
 
         newGame.fadeOut();
 
@@ -35,6 +38,7 @@ public class GameWindow extends JFrame {
         Point center = GraphicsEnvironment.getLocalGraphicsEnvironment().getCenterPoint();
         setBounds(center.x - width / 2, center.y - height / 2, width, height);
 
+        bgMusic.playOnLoop();
         setGlasspane();
         setVisible(true);
     }
@@ -53,11 +57,11 @@ public class GameWindow extends JFrame {
         getContentPane().add(masterchess);
         masterchess.fadeIn();
 
-        newGame = new Play(this);
+        newGame = new Play(this, bgMusic);
         newGame.fadeOut();
     }
 
-    public Game getGame() {
+    public MainMenu getGame() {
         return masterchess;
     }
 

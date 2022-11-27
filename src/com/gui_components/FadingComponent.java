@@ -374,6 +374,3 @@ public class FadingComponent extends JLayeredPane {
         }
     }
 }
-
-
-

@@ -18,9 +18,10 @@ public class UndoHandler implements MouseListener{
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        Icon icon = bch.undo();
-        bch.undoCapturedBoard(icon);
-
+        if(!gameWindow.getPlay().isStalemated()) {
+            Icon icon = bch.undo();
+            bch.undoCapturedBoard(icon);
+        }
     }
 
     @Override

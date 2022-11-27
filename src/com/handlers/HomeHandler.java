@@ -14,6 +14,7 @@ public class HomeHandler implements MouseListener {
     }
     @Override
     public void mouseClicked(MouseEvent e) {
+        gameWindow.getPlay().getBgMusic().playOnLoop();
         gameWindow.getPlay().fadeOut();
 
         gameWindow.getContentPane().remove(gameWindow.getPlay());
