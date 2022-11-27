@@ -629,6 +629,4 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             }
         } 
     } 
-    
-    
 }
