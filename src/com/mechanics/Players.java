@@ -11,10 +11,11 @@ public class Players {
     private final Stack<Cells> playerMoves = new Stack<>();
 
     private boolean isCheck = false;
-    private boolean isDraw = false;
     private boolean hasCastled = false;
     private boolean hasStored = false;
-    private final boolean isCheckMate = false;
+    private boolean hasMovedLeft = false;
+    private boolean hasMovedRight = false;
+    private boolean hasMovedKing = false;
 
     public Players(String name, int color) {
         
@@ -28,14 +29,6 @@ public class Players {
 
     public void addMove(Cells cell) {
         playerMoves.push(cell);
-        // Check if the player is repeating the same move 3 times
-        if (playerMoves.size() >= 6) {
-            if (playerMoves.get(playerMoves.size() - 1) == playerMoves.get(playerMoves.size() - 3) &&
-                    playerMoves.get(playerMoves.size() - 2) == playerMoves.get(playerMoves.size() - 4) &&
-                    playerMoves.get(playerMoves.size() - 5) == playerMoves.get(playerMoves.size() - 6)) {
-                isDraw = true;
-            }
-        }
     }
 
     public Stack<Cells> getMove() {
@@ -66,12 +59,30 @@ public class Players {
         this.hasStored = hasStored;
     }
 
-    public boolean isCheckMate() {
-        return isCheckMate;
+    
+
+    public boolean isHasMovedLeft() {
+        return hasMovedLeft;
     }
 
-    public boolean isDraw() {
-        return isDraw;
+    public void setHasMovedLeft(boolean hasMovedLeft) {
+        this.hasMovedLeft = hasMovedLeft;
+    }
+
+    public boolean isHasMovedRight() {
+        return hasMovedRight;
+    }
+
+    public void setHasMovedRight(boolean hasMovedRight) {
+        this.hasMovedRight = hasMovedRight;
+    }
+
+    public boolean isHasMovedKing() {
+        return hasMovedKing;
+    }
+
+    public void setHasMovedKing(boolean hasMovedKing) {
+        this.hasMovedKing = hasMovedKing;
     }
 
     public int getPlayerColor() {
