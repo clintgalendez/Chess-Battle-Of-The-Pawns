@@ -24,6 +24,7 @@ import com.handlers.SettingsHandler;
 import com.handlers.TurnBasedHandler;
 import com.handlers.UndoHandler;
 import com.loaders.GraphicsLoader;
+import com.loaders.SoundLoader;
 import com.mechanics.Cells;
 import com.mechanics.Players;
 
@@ -54,6 +55,7 @@ public class Play extends FadingComponent {
     private boolean isSuggesting = false;
     private boolean onAuto = false;
     private boolean isCastling = false;
+    private boolean stalemated = false;
 
     private final int[] coordinates = {0, 0, 0, 0};
     private int checkedPiece;
@@ -73,8 +75,11 @@ public class Play extends FadingComponent {
 
     private final Clock clock = new Clock();
 
-    public Play(GameWindow gameWindow) {
+    private final SoundLoader bgMusic;
+
+    public Play(GameWindow gameWindow, SoundLoader bgMusic) {
         this.gameWindow = gameWindow;
+        this.bgMusic = bgMusic;
 
         setSize(WIDTH, HEIGHT);
 
@@ -290,6 +295,7 @@ public class Play extends FadingComponent {
         allowedToMove = false;
         isSuggesting = false;
         onAuto = false;
+        stalemated = false;
 
         checkedPiece = 0;
 
@@ -370,6 +376,14 @@ public class Play extends FadingComponent {
         this.isCastling = isCastling;
     }
 
+    public boolean isStalemated() {
+        return stalemated;
+    }
+
+    public void setStalemated(boolean stalemated) {
+        this.stalemated = stalemated;
+    }
+
     public boolean isOnAuto() {
         return onAuto;
     }
@@ -420,5 +434,9 @@ public class Play extends FadingComponent {
 
     public Clock getClock() {
         return clock;
+    }
+
+    public SoundLoader getBgMusic() {
+        return bgMusic;
     }
 }

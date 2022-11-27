@@ -26,6 +26,7 @@ public class ButtonSliders extends JLabel {
 
     private boolean update = false;
     private boolean reverse = false;
+    private boolean playMusic = true;
 
     private ImageIcon icon;
 
@@ -73,11 +74,21 @@ public class ButtonSliders extends JLabel {
         } else if(deltaX >= 300) {
             icon = new ImageIcon(GraphicsLoader.loadImage(path_two, 65, 65));
             icon.paintIcon(this, g, (int)deltaX, 9); 
+
+            if(buttonNumber == 4 && !playMusic) {
+                playMusic = true;
+                gameWindow.getPlay().getBgMusic().playOnLoop();
+            }
         } else {
             icon = new ImageIcon(GraphicsLoader.loadImage(path_one, 65, 65));
             icon.paintIcon(this, g, (int)deltaX, 9);
             if(deltaX == 10) {
-                update = false;reverse = false;
+                update = false; reverse = false; 
+                
+                if(buttonNumber == 4 && playMusic) {
+                    playMusic = false;
+                    gameWindow.getPlay().getBgMusic().stop();
+                }
             }
         }
 

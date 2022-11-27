@@ -12,6 +12,8 @@ import javax.swing.ImageIcon;
 
 import com.interfaces.Mechanics;
 import com.loaders.GraphicsLoader;
+import com.loaders.ResourceLoader;
+import com.loaders.SoundLoader;
 import com.main.GameWindow;
 import com.mechanics.Cells;
 import com.mechanics.MoveSets;
@@ -24,6 +26,11 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
     Cells rookAfterLeavingInitPos;
 
     private final GameWindow gameWindow;
+
+    SoundLoader move = new SoundLoader(ResourceLoader.load("sounds/Move.wav"));
+    SoundLoader capture = new SoundLoader(ResourceLoader.load("sounds/Capture.wav"));
+    SoundLoader check = new SoundLoader(ResourceLoader.load("sounds/Check.wav"));
+    SoundLoader checkmate = new SoundLoader(ResourceLoader.load("sounds/Checkmate.wav"));
     
     public BoardCellsHandler(GameWindow gameWindow) {
         this.gameWindow = gameWindow;
@@ -84,12 +91,6 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasStored(true);
                 gameWindow.getPlay().getTurnHandler().getCurrentPlayer().setHasCastled(false);
             }
-
-            Cells sample = gameWindow.getPlay().getTurnHandler().getCurrentPlayer().getMove().peek();
-            System.out.println(sample.CONTAINS + " " + sample.pieceColor + " " + sample.piece);
-
-            System.out.println(gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasStored() + " " + gameWindow.getPlay().getTurnHandler().getCurrentPlayer().hasCastled());
-
             resetCellProperties(gameWindow.getPlay().getPrevChosenCell());
 
             gameWindow.getPlay().setIsCastling(false);
@@ -144,6 +145,12 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
     }
 
     public Cells changeCellProperties(Cells selectedMove) {
+        if(selectedMove.CONTAINS == 0) {
+            move.play();
+        } else if(selectedMove.CONTAINS != 0 && selectedMove.pieceColor == gameWindow.getPlay().getTurnHandler().getNextPlayer().getPlayerColor()) {
+            capture.play();
+        }
+        
         if(gameWindow.getPlay().getPrevChosenCell().CONTAINS == 5) { // If a selected piece to move is a pawn at start having two moves forward
             selectedMove.CONTAINS = 3; // Then change it to pawn at play having one move forward only
             selectedMove.setIcon(gameWindow.getPlay().getPrevChosenCell().getIcon());
@@ -436,6 +443,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
         }
 
         if(player.isCheck()) { // If current player is checked
+            check.play();
             gameWindow.getPlay().getNamePanel(gameWindow.getPlay().getTurnHandler().getCurrentPlayer()).setBackground(Color.YELLOW); // change own name panel to yellow
             gameWindow.getPlay().getNamePanel(gameWindow.getPlay().getTurnHandler().getNextPlayer()).setBackground(new Color(214, 188, 153)); // change next player's panel to default
         } else if(gameWindow.getPlay().getTurnHandler().getNextPlayer().isCheck()) { // If the previous player is still checked
@@ -454,8 +462,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
     }
 
     public void isCheckmate(Cells[][] board) {
-        boolean stalemated = checkForCheckmate();
-        if(stalemated) { // If the next player is checkmated
+        gameWindow.getPlay().setStalemated(checkForCheckmate());
+        if(gameWindow.getPlay().isStalemated()) { // If the next player is checkmated
             gameWindow.getPlay().getClock().timer.stop();
             
             // Disable all cells
@@ -469,6 +477,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
             // Change the color of the name panel of the loser to red, while green for the winner
             gameWindow.getPlay().getNamePanel(gameWindow.getPlay().getTurnHandler().getCurrentPlayer()).setBackground(Color.RED);
             gameWindow.getPlay().getNamePanel(gameWindow.getPlay().getTurnHandler().getNextPlayer()).setBackground(Color.GREEN);
+            gameWindow.getPlay().getUndoPanel().setEnabled(false);
         }
     }
 
@@ -490,7 +499,8 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 }
             }
         }
-
+        check.stop();
+        checkmate.play();
         return true; // Return that the player is checkmated
     }
 
@@ -618,5 +628,7 @@ public class BoardCellsHandler implements Mechanics, ActionListener {
                 gameWindow.getPlay().getBoard(gameWindow.getPlay().getTurnHandler().getCurrentPlayer()).removeFromCapturedBoard(y, x);
             }
         } 
-    }    
+    } 
+    
+    
 }
